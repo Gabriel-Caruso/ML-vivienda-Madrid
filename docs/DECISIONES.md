@@ -18,7 +18,8 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 - **Estado:** aprobada.
 - **Qué:** `catboost==1.2.10`, `scikit-learn==1.9.0`, `pandas==3.0.3`, `numpy==2.5.1`, `joblib==1.5.3` (las del `requirements.txt` del entrenamiento). FastAPI, Pydantic y Uvicorn con `>=` y versión exacta fijada por `uv.lock`.
 - **Por qué:** el modelo está serializado con esas versiones; cambiarlas puede romper la carga o alterar predicciones. La capa web no afecta al modelo y conviene poder actualizarla con `uv lock --upgrade-package`.
-- **Alternativas descartadas:** fijar también las dependencias indirectas (scipy, threadpoolctl...) a las del entrenamiento. No forman parte del objeto serializado y la carga y la predicción no dan avisos; además `uv.lock` ya las fija. Diferencias actuales: scipy 1.18.1 (entrenamiento 1.18.0), threadpoolctl 3.7.0 (3.6.0), plotly 7.1.0 (6.9.0).
+- **Dependencias indirectas:** las que también estaban en el entorno de entrenamiento se fijan a su versión con `[tool.uv] constraint-dependencies`: contourpy 1.3.3, fonttools 4.63.0, kiwisolver 1.5.0, matplotlib 3.11.0, narwhals 2.23.0, packaging 26.2, plotly 6.9.0, pyparsing 3.3.2, scipy 1.18.0, threadpoolctl 3.6.0, tzdata 2026.2. Una restricción solo limita la versión y no instala nada por sí misma. Con ellas fijadas pasan todos los tests y `scripts/verify_model.py` carga y predice sin avisos. `tests/unit/test_entorno.py` comprueba que la versión de Python y la de cada paquete fijado son las del entrenamiento.
+- **Alternativas descartadas:** dejar las indirectas libres (primera versión de esta decisión): no forman parte del objeto serializado, pero fijarlas elimina una fuente de diferencias sin coste. Declararlas como dependencias directas: daría a entender que el código las usa.
 - **Pydantic** se declara explícitamente aunque llegue con FastAPI, porque el código lo importa directamente.
 
 ## D-003. Gestión del proyecto con uv y backend de build `uv_build`
@@ -72,11 +73,32 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 - **Medición (Windows, RSS):** 45 MiB el intérprete, 161 MiB tras importar catboost, scikit-learn, pandas y FastAPI, 192 MiB con el modelo cargado.
 - **Implicación:** cabe en una instancia de 512 MB. La RAM del plan gratuito de Render no aparece en la documentación consultada: verificar en el panel al desplegar. En Linux la cifra puede variar.
 
+## D-010. Tests de todo lo programado, en cada paso
+
+- **Estado:** aprobada.
+- **Qué:** cada vez que se termina de programar algo se añaden sus tests y se ejecuta la batería completa (Ruff + pytest). Ningún paso se da por terminado sin ello.
+- **Tests actuales:** `test_config.py` (rutas), `test_entorno.py` (versiones del entrenamiento) y `test_modelo.py` (carga sin avisos, tipo y transformación del objetivo, 69 columnas por grupo y posición, categóricas nativas, predicción finita sobre una fila construida a mano). Una fixture de sesión en `tests/conftest.py` carga el modelo una sola vez.
+- **Por qué no se usan los CSV en los tests:** `data/` no está en el repositorio, así que en la CI no existiría. Los tests usan solo lo versionado (modelo y, desde el paso 2, fixtures).
+
+## D-011. Pares de tags sinónimos: una sola casilla
+
+- **Estado:** aprobada.
+- **Qué:** "Reformado" activa `tag_reformado` y `tag_reformada`; "A estrenar / nuevo" activa `tag_estrenar` y `tag_nuevo`. Cada par es una sola casilla en el contrato público.
+- **Por qué:** para el usuario son la misma característica; dos casillas obligarían a elegir entre sinónimos sin criterio. Marcar ambas columnas reproduce el caso de un anuncio que usa las dos palabras.
+- **Alternativa descartada:** dos casillas por par.
+
+## D-012. Valores de las categóricas en español; etiquetas legibles y bilingües
+
+- **Estado:** aprobada.
+- **Qué:** los valores de las categóricas del contrato (tipo de inmueble, zona, barrio, planta...) se envían en español, igual que en el modelo. Los nombres de campo siguen en inglés (`bathrooms`, `district`...). Para mostrar, cada campo, valor y tag tendrá una etiqueta legible en español y en inglés ("Baños" / "Bathrooms", no `baños_limpio`), definida en `domain/` y servida por `/api/v1/metadata`, para que la interfaz de la fase 2 no tenga que traducir nombres internos.
+- **Por qué:** los valores en español evitan una segunda tabla de mapeo entre el contrato y el modelo. Las etiquetas en el dominio mantienen todo el conocimiento del problema en un solo sitio.
+- **Alternativa descartada:** códigos en inglés para los valores (`flat`, `penthouse`): duplicaría el catálogo y añadiría un mapeo más sin beneficio para el usuario, que verá siempre la etiqueta traducida.
+
 ---
 
 ## Decisiones aprobadas para pasos siguientes
 
-- **Grupos de tags (paso 2):** "Características de la vivienda" (terraza, balcones, patio, jardín, piscina, parcela, vistas, garaje, armarios, calefacción, amueblada, equipada, electrodomésticos, portero, suite, reformado, reformada, estrenar, nuevo, reformar, urbanización, metro, parque, loft) y "Situación legal y del anuncio" (okupada, nuda propiedad, subasta, alquilada, proindiviso, rebaja, solo particulares, abstenerse agencias, exclusiva). El resto vale 0.
+- **Grupos de tags (paso 2):** "Características de la vivienda" (terraza, balcones, patio, jardín, piscina, parcela, vistas, garaje, armarios, calefacción, amueblada, equipada, electrodomésticos, portero, suite, reformado/reformada, estrenar/nuevo, reformar, urbanización, metro, parque, loft) y "Situación legal y del anuncio" (okupada, nuda propiedad, subasta, alquilada, proindiviso, rebaja, solo particulares, abstenerse agencias, exclusiva). El resto vale 0. Los pares con barra son una sola casilla (D-011).
 - **Rangos (paso 2):** `metros` entero 10-3100; `rooms` entero 0-20 o null; `bathrooms` entero 1-7 o null, 0 rechazado. Base: limpieza del notebook y valores mínimo y máximo de `train.csv` (metros 11-3015, habitaciones 0-20, baños 1-7).
 - **Ascensor, localización y planta (paso 3):** la API acepta null y aplica la regla del preprocesado: `NO_APLICA` para casas y chalets, `DESCONOCIDO` para el resto.
 - **Catálogo (paso 2):** se construye solo con `train.csv`. Las filas de test con valores fuera del catálogo (planta `22ª`) se excluyen de los fixtures.
