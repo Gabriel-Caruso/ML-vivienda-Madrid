@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Datos locales de trabajo (no se suben al repo)
+data/
+
+# Solo se versiona el joblib del modelo; cualquier otra copia queda fuera
+models/*.pkl
