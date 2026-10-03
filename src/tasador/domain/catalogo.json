@@ -1,0 +1,305 @@
+{
+  "version": 1,
+  "origen": {
+    "archivo": "data/train.csv",
+    "sha256": "6f5683bcf0acbf170dae63a482f0749e32f16c32b39fd86b7d5b1dde795e36a2"
+  },
+  "zonas": [
+    {
+      "zona": "arganzuela",
+      "barrios": [
+        "Acacias",
+        "Chopera",
+        "Delicias",
+        "Imperial",
+        "Legazpi",
+        "Palos de la Frontera"
+      ]
+    },
+    {
+      "zona": "barajas",
+      "barrios": [
+        "Aeropuerto",
+        "Alameda de Osuna",
+        "Campo de las Naciones-Corralejos",
+        "Casco Histórico de Barajas",
+        "Timón"
+      ]
+    },
+    {
+      "zona": "barrio-de-salamanca",
+      "barrios": [
+        "Castellana",
+        "Fuente del Berro",
+        "Goya",
+        "Guindalera",
+        "Lista",
+        "Recoletos"
+      ]
+    },
+    {
+      "zona": "carabanchel",
+      "barrios": [
+        "Abrantes",
+        "Buena Vista",
+        "Comillas",
+        "Opañel",
+        "Pau de Carabanchel",
+        "Puerta Bonita",
+        "San Isidro",
+        "Vista Alegre"
+      ]
+    },
+    {
+      "zona": "centro",
+      "barrios": [
+        "Chueca-Justicia",
+        "Huertas-Cortes",
+        "Lavapiés-Embajadores",
+        "Malasaña-Universidad",
+        "Palacio",
+        "Sol"
+      ]
+    },
+    {
+      "zona": "chamartin",
+      "barrios": [
+        "Bernabéu-Hispanoamérica",
+        "Castilla",
+        "Ciudad Jardín",
+        "El Viso",
+        "Nueva España",
+        "Prosperidad"
+      ]
+    },
+    {
+      "zona": "chamberi",
+      "barrios": [
+        "Almagro",
+        "Arapiles",
+        "Gaztambide",
+        "Nuevos Ministerios-Ríos Rosas",
+        "Trafalgar",
+        "Vallehermoso"
+      ]
+    },
+    {
+      "zona": "ciudad-lineal",
+      "barrios": [
+        "Atalaya",
+        "Colina",
+        "Concepción",
+        "Costillares",
+        "Pueblo Nuevo",
+        "Quintana",
+        "San Juan Bautista",
+        "San Pascual",
+        "Ventas"
+      ]
+    },
+    {
+      "zona": "fuencarral",
+      "barrios": [
+        "Arroyo del Fresno",
+        "El Pardo",
+        "Fuentelarreina",
+        "La Paz",
+        "Las Tablas",
+        "Mirasierra",
+        "Montecarmelo",
+        "Peñagrande",
+        "Pilar",
+        "Tres Olivos - Valverde"
+      ]
+    },
+    {
+      "zona": "hortaleza",
+      "barrios": [
+        "Apóstol Santiago",
+        "Canillas",
+        "Conde Orgaz-Piovera",
+        "Palomas",
+        "Pinar del Rey",
+        "Sanchinarro",
+        "Valdebebas - Valdefuentes",
+        "Virgen del Cortijo - Manoteras"
+      ]
+    },
+    {
+      "zona": "latina",
+      "barrios": [
+        "Águilas",
+        "Aluche",
+        "Campamento",
+        "Cuatro Vientos",
+        "Los Cármenes",
+        "Lucero",
+        "Puerta del Ángel"
+      ]
+    },
+    {
+      "zona": "moncloa",
+      "barrios": [
+        "Aravaca",
+        "Argüelles",
+        "Casa de Campo",
+        "Ciudad Universitaria",
+        "El Plantío",
+        "Valdemarín",
+        "Valdezarza"
+      ]
+    },
+    {
+      "zona": "moratalaz",
+      "barrios": [
+        "Fontarrón",
+        "Horcajo",
+        "Marroquina",
+        "Media Legua",
+        "Pavones",
+        "Vinateros"
+      ]
+    },
+    {
+      "zona": "puente-de-vallecas",
+      "barrios": [
+        "Entrevías",
+        "Numancia",
+        "Palomeras Bajas",
+        "Palomeras sureste",
+        "Portazgo",
+        "San Diego"
+      ]
+    },
+    {
+      "zona": "retiro",
+      "barrios": [
+        "Adelfas",
+        "Estrella",
+        "Ibiza",
+        "Jerónimos",
+        "Niño Jesús",
+        "Pacífico"
+      ]
+    },
+    {
+      "zona": "san-blas",
+      "barrios": [
+        "Amposta",
+        "Arcos",
+        "Canillejas",
+        "Hellín",
+        "Rejas",
+        "Rosas",
+        "Salvador",
+        "Simancas"
+      ]
+    },
+    {
+      "zona": "tetuan",
+      "barrios": [
+        "Bellas Vistas",
+        "Berruguete",
+        "Cuatro Caminos",
+        "Cuzco-Castillejos",
+        "Valdeacederas",
+        "Ventilla-Almenara"
+      ]
+    },
+    {
+      "zona": "usera",
+      "barrios": [
+        "12 de Octubre-Orcasur",
+        "Almendrales",
+        "Moscardó",
+        "Orcasitas",
+        "Pradolongo",
+        "San Fermín",
+        "Zofío"
+      ]
+    },
+    {
+      "zona": "vicalvaro",
+      "barrios": [
+        "Ambroz",
+        "Casco Histórico de Vicálvaro",
+        "El Cañaveral",
+        "Los Ahijones",
+        "Los Berrocales",
+        "Los Cerros",
+        "Valdebernardo - Valderrivas"
+      ]
+    },
+    {
+      "zona": "villa-de-vallecas",
+      "barrios": [
+        "Casco Histórico de Vallecas",
+        "Ensanche de Vallecas - La Gavia",
+        "Santa Eugenia",
+        "Valdecarros"
+      ]
+    },
+    {
+      "zona": "villaverde",
+      "barrios": [
+        "Butarque",
+        "Los Ángeles",
+        "Los Rosales",
+        "San Cristóbal",
+        "Villaverde Alto"
+      ]
+    }
+  ],
+  "tipos_inmueble": [
+    "Ático",
+    "Casa o chalet independiente",
+    "Casa rural",
+    "Chalet",
+    "Chalet adosado",
+    "Chalet pareado",
+    "Dúplex",
+    "Estudio",
+    "Piso"
+  ],
+  "ascensor": [
+    "DESCONOCIDO",
+    "N",
+    "NO_APLICA",
+    "S"
+  ],
+  "localizacion": [
+    "DESCONOCIDO",
+    "EXTERIOR",
+    "INTERIOR",
+    "NO_APLICA"
+  ],
+  "plantas": [
+    "-2",
+    "-1",
+    "BAJO",
+    "ENTREPLANTA",
+    "1ª",
+    "2ª",
+    "3ª",
+    "4ª",
+    "5ª",
+    "6ª",
+    "7ª",
+    "8ª",
+    "9ª",
+    "10ª",
+    "11ª",
+    "12ª",
+    "13ª",
+    "14ª",
+    "15ª",
+    "16ª",
+    "17ª",
+    "18ª",
+    "20ª",
+    "21ª",
+    "27ª",
+    "DESCONOCIDO",
+    "NO_APLICA"
+  ]
+}

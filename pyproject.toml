@@ -69,6 +69,10 @@ select = [
     "T20", # prohíbe print fuera de los scripts
     "RUF", # reglas propias de Ruff
 ]
+ignore = [
+    "SIM110", # pide sustituir bucles for por any()/all(): el proyecto prefiere bucles explícitos
+    "SIM300", # confunde constantes del dominio en mayúsculas con literales ("Yoda conditions")
+]
 
 [tool.ruff.lint.per-file-ignores]
 # Los scripts de un solo uso informan por consola.
@@ -79,5 +83,12 @@ quote-style = "double"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Permite testear las funciones puras de los scripts de un solo uso
+pythonpath = ["scripts"]
 addopts = ["-ra", "--strict-markers"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    # Starlette 1.7 recomienda httpx2 para el TestClient; la documentación de FastAPI
+    # sigue pidiendo httpx. Pendiente de decidir (docs/DECISIONES.md, D-024).
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
