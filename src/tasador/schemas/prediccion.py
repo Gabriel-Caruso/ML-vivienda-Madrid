@@ -190,7 +190,7 @@ class RespuestaPrediccion(BaseModel):
 
     model_config = ConfigDict(title="PredictionResponse")
 
-    estimated_price: float = Field(description="Precio estimado en euros, sin redondear.")
+    estimated_price: int = Field(description="Precio estimado, en euros enteros.")
     error_margin: float = Field(description="Margen relativo aplicado, por ejemplo 0.16.")
-    price_min: float = Field(description="Extremo inferior de la horquilla, en euros.")
-    price_max: float = Field(description="Extremo superior de la horquilla, en euros.")
+    price_min: int = Field(description="Extremo inferior de la horquilla, en euros enteros.")
+    price_max: int = Field(description="Extremo superior de la horquilla, en euros enteros.")

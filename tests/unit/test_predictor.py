@@ -152,16 +152,50 @@ def test_filas_del_fixture_se_reconstruyen_exactamente(predictor, filas_referenc
 # Prediccion
 
 
-def test_prediccion_identica_a_model_predict(predictor, modelo):
+def test_precio_exacto_identico_a_model_predict(predictor, modelo):
     tabla = predictor.construir_fila(peticion())
+    assert predictor.predecir_precio(peticion()) == float(modelo.predict(tabla)[0])
+
+
+def test_prediccion_redondeada_a_euros_enteros(predictor):
     resultado = predictor.predecir(peticion())
-    assert resultado.precio == float(modelo.predict(tabla)[0])
+    assert resultado.precio == round(predictor.predecir_precio(peticion()))
+    for valor in (resultado.precio, resultado.minimo, resultado.maximo):
+        assert isinstance(valor, int)
 
 
 def test_prediccion_incluye_horquilla_de_su_tramo(predictor):
     resultado = predictor.predecir(peticion())
-    assert resultado.minimo == pytest.approx(resultado.precio * (1 - resultado.margen))
-    assert resultado.maximo == pytest.approx(resultado.precio * (1 + resultado.margen))
+    assert resultado.minimo == round(resultado.precio * (1 - resultado.margen))
+    assert resultado.maximo == round(resultado.precio * (1 + resultado.margen))
+
+
+class ModeloConPrecioFijo:
+    """Modelo falso con las columnas reales y una predicción constante."""
+
+    def __init__(self, modelo_real, precio):
+        self.regressor_ = modelo_real.regressor_
+        self._precio = precio
+
+    def predict(self, tabla):
+        return [self._precio] * len(tabla)
+
+
+def test_tramo_se_elige_con_el_precio_redondeado(modelo):
+    # 249.999,6 se muestra como 250.000: se aplica el margen del tramo que empieza ahí
+    resultado = Predictor(ModeloConPrecioFijo(modelo, 249_999.6)).predecir(peticion())
+    assert resultado.precio == 250_000
+    assert resultado.margen == 0.15
+    assert resultado.minimo == 212_500
+    assert resultado.maximo == 287_500
+
+
+def test_redondeo_de_precio_y_extremos(modelo):
+    resultado = Predictor(ModeloConPrecioFijo(modelo, 100_000.4)).predecir(peticion())
+    assert resultado.precio == 100_000
+    assert resultado.margen == 0.16
+    assert resultado.minimo == 84_000
+    assert resultado.maximo == 116_000
 
 
 # Compatibilidad entre modelo y dominio

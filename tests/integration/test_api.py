@@ -104,9 +104,10 @@ def test_predict_valido(cliente):
     cuerpo = respuesta.json()
     assert set(cuerpo) == {"estimated_price", "error_margin", "price_min", "price_max"}
     assert cuerpo["price_min"] < cuerpo["estimated_price"] < cuerpo["price_max"]
-    assert cuerpo["price_min"] == pytest.approx(
-        cuerpo["estimated_price"] * (1 - cuerpo["error_margin"])
-    )
+    for clave in ("estimated_price", "price_min", "price_max"):
+        assert isinstance(cuerpo[clave], int)
+    assert cuerpo["price_min"] == round(cuerpo["estimated_price"] * (1 - cuerpo["error_margin"]))
+    assert cuerpo["price_max"] == round(cuerpo["estimated_price"] * (1 + cuerpo["error_margin"]))
 
 
 def test_predict_minimo(cliente):

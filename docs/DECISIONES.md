@@ -1,7 +1,18 @@
 # Registro de decisiones técnicas
 
 Cada entrada recoge qué se decidió, por qué y qué alternativas se descartaron.
-Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente de confirmar**.
+Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo** o **pendiente de confirmar**.
+
+## Índice
+
+| Área | Decisiones |
+|---|---|
+| Entorno y herramientas | D-001 Python 3.14.4 · D-002 versiones fijadas · D-003 uv y `uv_build` · D-005 Ruff y pytest · D-024 httpx |
+| Modelo y datos | D-006 `.gitignore` · D-007 joblib frente a pkl · D-008 reconstrucción de tags · D-009 memoria |
+| Dominio | D-011 sinónimos · D-012 valores en español y etiquetas · D-013 barrio-zona · D-014 `domain/` · D-016 catálogo |
+| Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
+| Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
+| Despliegue y documentación | D-026 Render · D-027 README |
 
 ---
 
@@ -81,6 +92,8 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 - **Qué:** cada vez que se termina de programar algo se añaden sus tests y se ejecuta la batería completa (Ruff + pytest). Ningún paso se da por terminado sin ello.
 - **Tests del paso 1:** `test_config.py` (rutas), `test_entorno.py` (versiones del entrenamiento) y `test_modelo.py` (carga sin avisos, tipo y transformación del objetivo, 69 columnas por grupo y posición, categóricas nativas, predicción finita sobre una fila construida a mano). Fixtures de sesión en `tests/conftest.py` cargan el modelo, el catálogo y las filas de referencia una sola vez.
 - **Tests del paso 2:** `test_reglas.py`, `test_rangos.py`, `test_etiquetas.py`, `test_catalogo.py`, `test_tags.py`, `test_campos.py`, `test_fixtures.py`, `test_scripts.py` (funciones puras de los scripts con datos sintéticos) e `integration/test_reproducibilidad.py`.
+- **Tests del paso 3:** `test_horquilla.py`, `test_peticion.py` (cada campo y código), `test_predictor.py` (orden y tipos de columnas, nulos a NaN, tags a 0, reglas, redondeo, compatibilidad modelo-dominio), `test_metadata.py`, `test_errores.py`, `test_logs.py`, `integration/test_api.py` (endpoints y cada código de error por HTTP) e `integration/test_referencia.py`.
+- **Tests del paso 4:** `test_despliegue.py` (coherencia de `render.yaml` y `ci.yml` con la app: health check, comando de arranque, versión de uv, comprobaciones de la CI).
 - **Por qué no se usan los CSV en los tests:** `data/` no está en el repositorio, así que en la CI no existiría. Los tests usan solo lo versionado (modelo, catálogo y fixtures). La única excepción es `test_reproducibilidad.py`, que se salta automáticamente si no hay CSV: en local comprueba que el catálogo y los fixtures versionados son exactamente los que generan los scripts.
 
 ## D-011. Pares de tags sinónimos: una sola casilla
@@ -169,14 +182,14 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 - **Qué:** `scripts/build_fixtures.py` reconstruye `data/test.csv` como el notebook y se queda con las filas "expresables": ninguna columna binaria activa fuera de las 33 públicas, pares de sinónimos coherentes y todos los valores categóricos en el catálogo. Son 50 de 2.237. De ellas elige 20 con `random_state=42`, priorizando primero todos los tipos de inmueble, después todas las filas con baños y después zonas no cubiertas. Guarda solo las 69 columnas del modelo, en su orden, y el índice de la fila en test para trazabilidad.
 - **Resultado:** 15 zonas, 6 tipos de inmueble, 5 filas con baños y 15 sin ellos, estudios con 0 habitaciones, casas y chalets con `NO_APLICA`, filas sin tags y con varios tags y flags legales.
 - **Por qué:** el test de referencia (paso 3) compara la respuesta de la API con `model.predict()` sobre la fila exacta del notebook, sin ninguna proyección intermedia que el test diera por buena.
-- **Limitación aceptada:** las filas expresables son menos variadas que el conjunto completo (no hay casa rural, chalet adosado ni chalet, ni casos `DESCONOCIDO`). Los tests unitarios del paso 3 cubrirán esos casos con peticiones construidas a mano.
+- **Limitación aceptada:** las filas expresables son menos variadas que el conjunto completo (no hay casa rural, chalet adosado ni chalet, ni casos `DESCONOCIDO`). Esos casos se cubren con peticiones construidas a mano en `test_predictor.py` y `test_api.py`.
 - **Alternativas descartadas:** filas variadas con proyección al contrato público; ambos conjuntos.
 
 ## D-018. Horquilla de precio por tramos
 
-- **Estado:** aprobada la regla; valores provisionales hasta recalcularlos con el joblib. Implementada en `config.py` (`TRAMOS_ERROR`) y `services/horquilla.py`.
+- **Estado:** aprobada. Implementada en `config.py` (`TRAMOS_ERROR`) y `services/horquilla.py`.
 - **Qué:** el margen de la horquilla depende del tramo en que cae el precio predicho, con el error relativo de cada tramo, no con un porcentaje fijo.
-- **Valores provisionales (README de ML-idealista):**
+- **Valores (README de ML-idealista, error relativo redondeado):**
 
   | Tramo de precio predicho (€) | Error relativo |
   |---|---:|
@@ -186,7 +199,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
   | 835.600 - 1.490.000 | 15 % |
   | 1.490.000 o más | 24 % |
 
-- **Duda abierta:** las métricas globales de ese README (MAE 181.256 €, RMSE 443.717 €, R² 0,861) no coinciden con las del modelo joblib que se despliega (MAE 180.710 €, RMSE 439.765 €, R² 0,863). Probablemente la tabla se calculó con el modelo antiguo (el pkl, D-007). El responsable del proyecto recalculará los tramos con el joblib; hasta entonces se usan estos valores como provisionales.
+- **Validez:** las métricas globales de ese README (MAE 181.256 €) no coinciden con las indicadas para el modelo joblib (MAE 180.710 €), lo que hizo dudar de si la tabla correspondía al modelo desplegado. El responsable del proyecto confirmó que los valores por tramo son correctos y se usan redondeados.
 - **Fuera del rango de la tabla (aprobado):** se aplica el tramo más cercano (el primero por debajo de 35.000 € y el último por encima de 13.000.000 €). Un precio exactamente en un corte pertenece al tramo superior.
 
 ## D-019. Validación en el esquema con códigos de error propios
@@ -204,13 +217,14 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 - **Estado:** aprobada.
 - **Qué:** `services/predictor.py` asigna un valor a cada columna: los 9 campos según `domain/campos.py`, todas las columnas `flag_*`/`tag_*` a 0 de forma explícita y después a 1 las de las opciones enviadas. Si alguna columna del modelo queda sin valor, error explícito (no hay `reindex(fill_value=0)`). Tipos iguales a los de `read_csv` en el notebook: `metros` y binarias `int64`, baños y habitaciones `float64` (null pasa a NaN), categóricas `str`.
 - **Comprobación al arrancar:** al crear el `Predictor` se verifica que cada columna del modelo tiene origen (campo o binaria) y que todas las columnas del dominio existen en el modelo. Un modelo incompatible impide arrancar la app, en vez de fallar en la primera petición.
-- **Verificado:** las 20 filas del fixture se reconstruyen exactamente (`assert_frame_equal`) y la predicción de la API es idéntica, bit a bit, a `model.predict()` sobre la fila del notebook.
+- **Verificado:** las 20 filas del fixture se reconstruyen exactamente (`assert_frame_equal`) y el precio exacto del servicio es idéntico, bit a bit, a `model.predict()` sobre la fila del notebook (la API lo devuelve redondeado, D-021).
 
-## D-021. Respuesta de predicción sin redondear
+## D-021. Precios redondeados a euros enteros
 
-- **Estado:** aprobada.
-- **Qué:** `estimated_price`, `error_margin`, `price_min` y `price_max` como números sin redondear (euros).
-- **Por qué:** el redondeo es cosa de presentación (la interfaz formateará según el idioma) y permite que el test de referencia exija igualdad exacta con `model.predict()`.
+- **Estado:** aprobada (sustituye a la versión inicial, que devolvía el precio sin redondear).
+- **Qué:** `estimated_price`, `price_min` y `price_max` son enteros (euros). El tramo de error se elige con el precio ya redondeado, que es el que ve el usuario (un 249.999,6 se muestra como 250.000 y lleva el margen del tramo que empieza en 250.000), y los extremos se calculan sobre ese precio y se redondean. `error_margin` sigue siendo decimal (0.16).
+- **Exactitud:** `Predictor.predecir_precio()` expone la salida exacta del modelo. El test de referencia comprueba que es idéntica a `model.predict()` sobre la fila del notebook y que la API devuelve exactamente ese valor redondeado.
+- **Alternativa descartada:** devolver el precio sin redondear y dejar el redondeo a la interfaz. Unos céntimos sobre una estimación con un 15 % de error transmiten una precisión que no existe.
 
 ## D-022. Metadata del formulario
 
@@ -227,18 +241,48 @@ Estado: **aprobada** (confirmada por el responsable del proyecto) o **pendiente 
 
 ## D-024. httpx para el TestClient: aviso de Starlette
 
-- **Estado:** pendiente de decidir.
+- **Estado:** aprobada: se mantiene `httpx` con el aviso filtrado.
 - **Qué pasa:** Starlette 1.7 emite un `DeprecationWarning` al usar el `TestClient` con `httpx` y recomienda `httpx2` (soportado desde Starlette 1.2.0, mayo de 2026). La documentación de FastAPI sigue indicando `httpx`. Como pytest convierte los avisos en errores (D-005), se ignora únicamente ese aviso en `pyproject.toml`.
-- **Opciones:** mantener `httpx` con el aviso filtrado (actual), o sustituirlo por `httpx2` (paquete de la organización pydantic, 2.13.1) y quitar el filtro.
+- **Alternativa descartada (por ahora):** sustituirlo por `httpx2` (paquete de la organización pydantic, 2.13.1). Si una versión futura de Starlette deja de admitir `httpx`, el filtro dejará de bastar y habrá que revisarlo.
 - **Fuentes:** https://github.com/Kludex/starlette/blob/main/docs/release-notes.md, https://fastapi.tiangolo.com/tutorial/testing/
+
+## D-025. Integración continua con GitHub Actions
+
+- **Estado:** aprobada.
+- **Qué:** `.github/workflows/ci.yml` se ejecuta en cada push y pull request: `actions/checkout@v7.0.1`, `astral-sh/setup-uv@v10.2.0` con uv 0.12.23 y caché, `uv python install` (lee `.python-version`), `uv sync --locked`, `ruff format --check`, `ruff check` y `pytest`. Permisos de solo lectura.
+- **Por qué:** `--locked` hace fallar la CI si `uv.lock` no corresponde a `pyproject.toml`. `ruff format --check` comprueba el formato sin modificar nada. Las acciones se fijan a versiones exactas para que un cambio de versión no altere la CI sin aviso.
+- **Sin datos:** `data/` no está en el repositorio. Los 3 tests de reproducibilidad se saltan solos y el resto (incluido el de referencia, que usa los fixtures versionados) se ejecuta. Simulado en una copia limpia sin `data/` ni `.venv`: 283 pasan y 3 se saltan.
+- **Alternativa descartada:** `actions/setup-python`: uv ya instala la versión de `.python-version`, como recomienda su documentación.
+- **Fuentes:** https://docs.astral.sh/uv/guides/integration/github/, https://github.com/astral-sh/setup-uv
+
+## D-026. Despliegue en Render con blueprint
+
+- **Estado:** aprobada. El despliegue lo hace el responsable del proyecto desde el panel de Render.
+- **Qué (`render.yaml`):** servicio `web`, `runtime: python`, `plan: free`, región `frankfurt`, `buildCommand: uv sync --locked --no-dev`, `startCommand: uv run --no-sync uvicorn --factory tasador.main:create_app --host 0.0.0.0 --port $PORT`, `healthCheckPath: /api/v1/health`, `autoDeployTrigger: checksPass` y `UV_VERSION=0.12.23`.
+- **Por qué:**
+  - Render activa uv al encontrar `uv.lock` y toma Python de `.python-version` (D-001).
+  - `--no-dev` deja fuera ruff, pytest y httpx en producción.
+  - `--no-sync` en el arranque evita reinstalar: el entorno ya se creó en el build.
+  - `0.0.0.0` y `$PORT` son obligatorios en Render.
+  - Fráncfort es la región disponible más cercana a Madrid.
+  - `checksPass` solo despliega si la CI pasa.
+- **Ensayado en local:** con un entorno aparte, `uv sync --locked --no-dev` no instala pytest ni ruff, y el comando de arranque levanta la app, carga el modelo y responde en health y predict.
+- **Pendiente de verificar en el primer despliegue:**
+  - que Render ofrece Python 3.14.4 exacto (la documentación solo garantiza 3.7.3 y posteriores, con 3.14.3 por defecto);
+  - que `uv` está en el PATH en tiempo de ejecución (la documentación indica que se puede usar "en el build y otros scripts");
+  - la RAM disponible del plan gratuito (D-009).
+- **Alternativas descartadas:** `pip install` con un `requirements.txt` exportado (duplicaría `uv.lock`); `autoDeployTrigger: commit` (podría desplegar un commit con tests rotos).
+- **Fuentes:** https://render.com/docs/blueprint-spec, https://render.com/docs/uv-version, https://render.com/docs/troubleshooting-python-deploys, https://render.com/docs/web-services, https://render.com/docs/health-checks, https://render.com/docs/free
+
+## D-027. README
+
+- **Estado:** aprobada.
+- **Qué:** en español. Incluye qué es, el origen del modelo, las métricas en test indicadas por el responsable (MAE 180.710 €, RMSE 439.765 €, R² 0,863), la tabla de tramos, cómo ejecutarlo en local con uv, los endpoints con ejemplos reales, la tabla de códigos de error, el despliegue y el arranque en frío de Render (15 minutos sin tráfico, alrededor de un minuto para despertar), las limitaciones y la autoría (Ramiro Caruso y Ana Manzanares, con el EDA acreditado a Ana).
+- **Limitación sin concretar:** la fecha de los datos. El dataset de Kaggle no la indica en lo consultado, así que el README dice "una fecha concreta" sin inventarla.
 
 ---
 
-## Decisiones aprobadas para pasos siguientes
-
-- **Render (paso 4):** build `uv sync`, `UV_VERSION=0.12.23`, health check en `/api/v1/health`, arranque `uvicorn --factory tasador.main:create_app --host 0.0.0.0 --port $PORT`.
-
 ## Pendiente de confirmar
 
-- Tramos de la horquilla calculados con el modelo joblib (D-018).
-- `httpx` o `httpx2` para el TestClient (D-024).
+- Las tres verificaciones del primer despliegue en Render (D-026).
+- Fecha de los datos para el README, si se quiere concretar (D-027).

@@ -1,0 +1,40 @@
+# Integración continua: formato, lint y tests en cada push y pull request.
+# Usa la misma versión de uv que el desarrollo local y Render, y el Python de
+# .python-version. Los tests que necesitan data/ se saltan solos (no está en el repo).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Ruff y pytest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7.0.1
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.23"
+          enable-cache: true
+
+      - name: Instalar Python (versión de .python-version)
+        run: uv python install
+
+      - name: Instalar dependencias exactas de uv.lock
+        run: uv sync --locked
+
+      - name: Comprobar formato
+        run: uv run ruff format --check .
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Tests
+        run: uv run pytest

@@ -46,12 +46,12 @@ class ColumnasIncompatiblesError(Exception):
 
 @dataclass(frozen=True)
 class Prediccion:
-    """Resultado de una predicción con su horquilla."""
+    """Resultado de una predicción con su horquilla, en euros enteros."""
 
-    precio: float
+    precio: int
     margen: float
-    minimo: float
-    maximo: float
+    minimo: int
+    maximo: int
 
 
 def comprobar_columnas(columnas_modelo: list[str]) -> None:
@@ -163,14 +163,22 @@ class Predictor:
                 tipos[columna] = "str"
         return tabla.astype(tipos)
 
-    def predecir(self, peticion: PeticionPrediccion) -> Prediccion:
-        """Precio estimado (euros, sin transformar) y horquilla según su tramo."""
+    def predecir_precio(self, peticion: PeticionPrediccion) -> float:
+        """Salida exacta del modelo en euros (predict() ya deshace el logaritmo)."""
         fila = self.construir_fila(peticion)
-        precio = float(self._modelo.predict(fila)[0])
+        return float(self._modelo.predict(fila)[0])
+
+    def predecir(self, peticion: PeticionPrediccion) -> Prediccion:
+        """Precio estimado y horquilla, redondeados a euros enteros.
+
+        El tramo de error se elige con el precio ya redondeado, que es el que
+        ve el usuario, y los extremos se calculan sobre ese mismo precio.
+        """
+        precio = round(self.predecir_precio(peticion))
         horquilla = calcular_horquilla(precio)
         return Prediccion(
             precio=precio,
             margen=horquilla.margen,
-            minimo=horquilla.minimo,
-            maximo=horquilla.maximo,
+            minimo=round(horquilla.minimo),
+            maximo=round(horquilla.maximo),
         )

@@ -1,0 +1,20 @@
+# Blueprint de Render: servicio web gratuito con la API del tasador.
+# Python sale de .python-version y uv se activa porque existe uv.lock en la raíz.
+# Referencia: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: tasador-madrid
+    runtime: python
+    plan: free
+    # Región más cercana a Madrid
+    region: frankfurt
+    # Solo dependencias de producción, exactamente las de uv.lock
+    buildCommand: uv sync --locked --no-dev
+    # El entorno ya está instalado en el build: no se vuelve a sincronizar al arrancar
+    startCommand: uv run --no-sync uvicorn --factory tasador.main:create_app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    # Despliega solo si la CI de GitHub (Ruff + pytest) pasa
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: UV_VERSION
+        value: 0.12.23

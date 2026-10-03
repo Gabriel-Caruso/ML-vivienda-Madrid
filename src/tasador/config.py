@@ -22,8 +22,8 @@ VERSION_APP = version("tasador-madrid")
 # Cada tramo es (límite inferior incluido en euros, margen relativo) y se aplica
 # hasta el límite inferior del siguiente. El primero empieza en 0 y el último no
 # tiene techo, de modo que los precios fuera de la tabla usan el tramo más cercano.
-# PROVISIONAL: valores del README de ML-idealista, pendientes de recalcular con
-# el modelo joblib (docs/DECISIONES.md, D-018).
+# Valores: error relativo por tramo del README de ML-idealista, redondeado
+# (docs/DECISIONES.md, D-018).
 TRAMOS_ERROR = (
     (0, 0.16),
     (250_000, 0.15),
