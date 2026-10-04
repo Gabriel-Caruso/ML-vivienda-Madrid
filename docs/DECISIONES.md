@@ -276,7 +276,9 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
   - `uv run --no-sync` funciona en tiempo de ejecución y el modelo carga (69 columnas);
   - contra la URL pública: health, raíz, metadata, `/docs`, predicción y los errores `BARRIO_NOT_IN_ZONE` y `BATHROOMS_ZERO` responden como en local, y el precio exacto en Linux es idéntico al de Windows;
   - `checksPass` funciona: el commit `8b897aa` no se desplegó porque la CI falló (ver D-002, `tzdata`).
-- **Pendiente:** el campo Health Check Path estaba vacío en el panel y hay que fijarlo a `/api/v1/health`; consultar la memoria en Metrics (D-009).
+- **Ajustes posteriores en el panel:** Health Check Path estaba vacío y se fijó a `/api/v1/health`. El primer build avisó de que Render no tenía acceso al repositorio a través de su aplicación de GitHub; sin ese acceso no recibe pushes ni el estado de la CI y `checksPass` no dispara despliegues. Se concedió el acceso y se desplegó `0944189` manualmente.
+- **Verificado con `0944189` desplegado (URL pública):** precio, mínimo y máximo redondeados; tramo general (16 % y 15 %) y de lujo (24 %); chalet sin datos opcionales; `HEAD` 200 en `/` y `/api/v1/health`; `NOT_FOUND` (404), `METHOD_NOT_ALLOWED` (405 con `Allow: POST`), `INVALID_JSON` (400 con cuerpo Latin-1), varios errores 422 a la vez y `BARRIO_NOT_IN_ZONE`.
+- **Memoria:** límite de 512 MB en el plan gratuito. El uso real solo se muestra en planes de pago; la referencia es la medición local (unos 192 MiB, D-009).
 - **Alternativas descartadas:** `pip install` con un `requirements.txt` exportado (duplicaría `uv.lock`); `autoDeployTrigger: commit` (podría desplegar un commit con tests rotos).
 - **Fuentes:** https://render.com/docs/blueprint-spec, https://render.com/docs/uv-version, https://render.com/docs/troubleshooting-python-deploys, https://render.com/docs/web-services, https://render.com/docs/health-checks, https://render.com/docs/free
 
@@ -290,5 +292,4 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 ## Pendiente de confirmar
 
-- Health Check Path en el panel de Render y memoria en uso (D-026).
 - Fecha de los datos para el README, si se quiere concretar (D-027).
