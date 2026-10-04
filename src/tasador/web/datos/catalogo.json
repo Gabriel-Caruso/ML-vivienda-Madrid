@@ -1,0 +1,935 @@
+{
+  "fields": [
+    {
+      "name": "area_m2",
+      "label": {
+        "es": "Metros cuadrados",
+        "en": "Square metres"
+      },
+      "required": true,
+      "range": {
+        "min": 10,
+        "max": 3100
+      }
+    },
+    {
+      "name": "bathrooms",
+      "label": {
+        "es": "Baños",
+        "en": "Bathrooms"
+      },
+      "required": false,
+      "range": {
+        "min": 1,
+        "max": 7
+      }
+    },
+    {
+      "name": "rooms",
+      "label": {
+        "es": "Habitaciones",
+        "en": "Bedrooms"
+      },
+      "required": false,
+      "range": {
+        "min": 0,
+        "max": 20
+      }
+    },
+    {
+      "name": "district",
+      "label": {
+        "es": "Distrito",
+        "en": "District"
+      },
+      "required": true,
+      "range": null
+    },
+    {
+      "name": "property_type",
+      "label": {
+        "es": "Tipo de inmueble",
+        "en": "Property type"
+      },
+      "required": true,
+      "range": null
+    },
+    {
+      "name": "lift",
+      "label": {
+        "es": "Ascensor",
+        "en": "Lift"
+      },
+      "required": false,
+      "range": null
+    },
+    {
+      "name": "position",
+      "label": {
+        "es": "Exterior / interior",
+        "en": "Exterior / interior"
+      },
+      "required": false,
+      "range": null
+    },
+    {
+      "name": "neighbourhood",
+      "label": {
+        "es": "Barrio",
+        "en": "Neighbourhood"
+      },
+      "required": true,
+      "range": null
+    },
+    {
+      "name": "floor",
+      "label": {
+        "es": "Planta",
+        "en": "Floor"
+      },
+      "required": false,
+      "range": null
+    }
+  ],
+  "districts": [
+    {
+      "value": "arganzuela",
+      "label": {
+        "es": "Arganzuela",
+        "en": "Arganzuela"
+      },
+      "neighbourhoods": [
+        "Acacias",
+        "Chopera",
+        "Delicias",
+        "Imperial",
+        "Legazpi",
+        "Palos de la Frontera"
+      ]
+    },
+    {
+      "value": "barajas",
+      "label": {
+        "es": "Barajas",
+        "en": "Barajas"
+      },
+      "neighbourhoods": [
+        "Aeropuerto",
+        "Alameda de Osuna",
+        "Campo de las Naciones-Corralejos",
+        "Casco Histórico de Barajas",
+        "Timón"
+      ]
+    },
+    {
+      "value": "carabanchel",
+      "label": {
+        "es": "Carabanchel",
+        "en": "Carabanchel"
+      },
+      "neighbourhoods": [
+        "Abrantes",
+        "Buena Vista",
+        "Comillas",
+        "Opañel",
+        "Pau de Carabanchel",
+        "Puerta Bonita",
+        "San Isidro",
+        "Vista Alegre"
+      ]
+    },
+    {
+      "value": "centro",
+      "label": {
+        "es": "Centro",
+        "en": "Centro"
+      },
+      "neighbourhoods": [
+        "Chueca-Justicia",
+        "Huertas-Cortes",
+        "Lavapiés-Embajadores",
+        "Malasaña-Universidad",
+        "Palacio",
+        "Sol"
+      ]
+    },
+    {
+      "value": "chamartin",
+      "label": {
+        "es": "Chamartín",
+        "en": "Chamartín"
+      },
+      "neighbourhoods": [
+        "Bernabéu-Hispanoamérica",
+        "Castilla",
+        "Ciudad Jardín",
+        "El Viso",
+        "Nueva España",
+        "Prosperidad"
+      ]
+    },
+    {
+      "value": "chamberi",
+      "label": {
+        "es": "Chamberí",
+        "en": "Chamberí"
+      },
+      "neighbourhoods": [
+        "Almagro",
+        "Arapiles",
+        "Gaztambide",
+        "Nuevos Ministerios-Ríos Rosas",
+        "Trafalgar",
+        "Vallehermoso"
+      ]
+    },
+    {
+      "value": "ciudad-lineal",
+      "label": {
+        "es": "Ciudad Lineal",
+        "en": "Ciudad Lineal"
+      },
+      "neighbourhoods": [
+        "Atalaya",
+        "Colina",
+        "Concepción",
+        "Costillares",
+        "Pueblo Nuevo",
+        "Quintana",
+        "San Juan Bautista",
+        "San Pascual",
+        "Ventas"
+      ]
+    },
+    {
+      "value": "fuencarral",
+      "label": {
+        "es": "Fuencarral-El Pardo",
+        "en": "Fuencarral-El Pardo"
+      },
+      "neighbourhoods": [
+        "Arroyo del Fresno",
+        "El Pardo",
+        "Fuentelarreina",
+        "La Paz",
+        "Las Tablas",
+        "Mirasierra",
+        "Montecarmelo",
+        "Peñagrande",
+        "Pilar",
+        "Tres Olivos - Valverde"
+      ]
+    },
+    {
+      "value": "hortaleza",
+      "label": {
+        "es": "Hortaleza",
+        "en": "Hortaleza"
+      },
+      "neighbourhoods": [
+        "Apóstol Santiago",
+        "Canillas",
+        "Conde Orgaz-Piovera",
+        "Palomas",
+        "Pinar del Rey",
+        "Sanchinarro",
+        "Valdebebas - Valdefuentes",
+        "Virgen del Cortijo - Manoteras"
+      ]
+    },
+    {
+      "value": "latina",
+      "label": {
+        "es": "Latina",
+        "en": "Latina"
+      },
+      "neighbourhoods": [
+        "Águilas",
+        "Aluche",
+        "Campamento",
+        "Cuatro Vientos",
+        "Los Cármenes",
+        "Lucero",
+        "Puerta del Ángel"
+      ]
+    },
+    {
+      "value": "moncloa",
+      "label": {
+        "es": "Moncloa-Aravaca",
+        "en": "Moncloa-Aravaca"
+      },
+      "neighbourhoods": [
+        "Aravaca",
+        "Argüelles",
+        "Casa de Campo",
+        "Ciudad Universitaria",
+        "El Plantío",
+        "Valdemarín",
+        "Valdezarza"
+      ]
+    },
+    {
+      "value": "moratalaz",
+      "label": {
+        "es": "Moratalaz",
+        "en": "Moratalaz"
+      },
+      "neighbourhoods": [
+        "Fontarrón",
+        "Horcajo",
+        "Marroquina",
+        "Media Legua",
+        "Pavones",
+        "Vinateros"
+      ]
+    },
+    {
+      "value": "puente-de-vallecas",
+      "label": {
+        "es": "Puente de Vallecas",
+        "en": "Puente de Vallecas"
+      },
+      "neighbourhoods": [
+        "Entrevías",
+        "Numancia",
+        "Palomeras Bajas",
+        "Palomeras sureste",
+        "Portazgo",
+        "San Diego"
+      ]
+    },
+    {
+      "value": "retiro",
+      "label": {
+        "es": "Retiro",
+        "en": "Retiro"
+      },
+      "neighbourhoods": [
+        "Adelfas",
+        "Estrella",
+        "Ibiza",
+        "Jerónimos",
+        "Niño Jesús",
+        "Pacífico"
+      ]
+    },
+    {
+      "value": "barrio-de-salamanca",
+      "label": {
+        "es": "Salamanca",
+        "en": "Salamanca"
+      },
+      "neighbourhoods": [
+        "Castellana",
+        "Fuente del Berro",
+        "Goya",
+        "Guindalera",
+        "Lista",
+        "Recoletos"
+      ]
+    },
+    {
+      "value": "san-blas",
+      "label": {
+        "es": "San Blas-Canillejas",
+        "en": "San Blas-Canillejas"
+      },
+      "neighbourhoods": [
+        "Amposta",
+        "Arcos",
+        "Canillejas",
+        "Hellín",
+        "Rejas",
+        "Rosas",
+        "Salvador",
+        "Simancas"
+      ]
+    },
+    {
+      "value": "tetuan",
+      "label": {
+        "es": "Tetuán",
+        "en": "Tetuán"
+      },
+      "neighbourhoods": [
+        "Bellas Vistas",
+        "Berruguete",
+        "Cuatro Caminos",
+        "Cuzco-Castillejos",
+        "Valdeacederas",
+        "Ventilla-Almenara"
+      ]
+    },
+    {
+      "value": "usera",
+      "label": {
+        "es": "Usera",
+        "en": "Usera"
+      },
+      "neighbourhoods": [
+        "12 de Octubre-Orcasur",
+        "Almendrales",
+        "Moscardó",
+        "Orcasitas",
+        "Pradolongo",
+        "San Fermín",
+        "Zofío"
+      ]
+    },
+    {
+      "value": "vicalvaro",
+      "label": {
+        "es": "Vicálvaro",
+        "en": "Vicálvaro"
+      },
+      "neighbourhoods": [
+        "Ambroz",
+        "Casco Histórico de Vicálvaro",
+        "El Cañaveral",
+        "Los Ahijones",
+        "Los Berrocales",
+        "Los Cerros",
+        "Valdebernardo - Valderrivas"
+      ]
+    },
+    {
+      "value": "villa-de-vallecas",
+      "label": {
+        "es": "Villa de Vallecas",
+        "en": "Villa de Vallecas"
+      },
+      "neighbourhoods": [
+        "Casco Histórico de Vallecas",
+        "Ensanche de Vallecas - La Gavia",
+        "Santa Eugenia",
+        "Valdecarros"
+      ]
+    },
+    {
+      "value": "villaverde",
+      "label": {
+        "es": "Villaverde",
+        "en": "Villaverde"
+      },
+      "neighbourhoods": [
+        "Butarque",
+        "Los Ángeles",
+        "Los Rosales",
+        "San Cristóbal",
+        "Villaverde Alto"
+      ]
+    }
+  ],
+  "property_types": [
+    {
+      "value": "Ático",
+      "label": {
+        "es": "Ático",
+        "en": "Penthouse"
+      }
+    },
+    {
+      "value": "Casa o chalet independiente",
+      "label": {
+        "es": "Casa o chalet independiente",
+        "en": "Detached house"
+      }
+    },
+    {
+      "value": "Casa rural",
+      "label": {
+        "es": "Casa rural",
+        "en": "Country house"
+      }
+    },
+    {
+      "value": "Chalet",
+      "label": {
+        "es": "Chalet",
+        "en": "Chalet"
+      }
+    },
+    {
+      "value": "Chalet adosado",
+      "label": {
+        "es": "Chalet adosado",
+        "en": "Terraced house"
+      }
+    },
+    {
+      "value": "Chalet pareado",
+      "label": {
+        "es": "Chalet pareado",
+        "en": "Semi-detached house"
+      }
+    },
+    {
+      "value": "Dúplex",
+      "label": {
+        "es": "Dúplex",
+        "en": "Duplex"
+      }
+    },
+    {
+      "value": "Estudio",
+      "label": {
+        "es": "Estudio",
+        "en": "Studio"
+      }
+    },
+    {
+      "value": "Piso",
+      "label": {
+        "es": "Piso",
+        "en": "Flat"
+      }
+    }
+  ],
+  "lift": [
+    {
+      "value": "N",
+      "label": {
+        "es": "No",
+        "en": "No"
+      }
+    },
+    {
+      "value": "S",
+      "label": {
+        "es": "Sí",
+        "en": "Yes"
+      }
+    }
+  ],
+  "position": [
+    {
+      "value": "EXTERIOR",
+      "label": {
+        "es": "Exterior",
+        "en": "Exterior"
+      }
+    },
+    {
+      "value": "INTERIOR",
+      "label": {
+        "es": "Interior",
+        "en": "Interior"
+      }
+    }
+  ],
+  "floors": [
+    {
+      "value": "-2",
+      "label": {
+        "es": "Sótano (-2)",
+        "en": "Basement (-2)"
+      }
+    },
+    {
+      "value": "-1",
+      "label": {
+        "es": "Sótano (-1)",
+        "en": "Basement (-1)"
+      }
+    },
+    {
+      "value": "BAJO",
+      "label": {
+        "es": "Bajo",
+        "en": "Ground floor"
+      }
+    },
+    {
+      "value": "ENTREPLANTA",
+      "label": {
+        "es": "Entreplanta",
+        "en": "Mezzanine"
+      }
+    },
+    {
+      "value": "1ª",
+      "label": {
+        "es": "1ª planta",
+        "en": "1st floor"
+      }
+    },
+    {
+      "value": "2ª",
+      "label": {
+        "es": "2ª planta",
+        "en": "2nd floor"
+      }
+    },
+    {
+      "value": "3ª",
+      "label": {
+        "es": "3ª planta",
+        "en": "3rd floor"
+      }
+    },
+    {
+      "value": "4ª",
+      "label": {
+        "es": "4ª planta",
+        "en": "4th floor"
+      }
+    },
+    {
+      "value": "5ª",
+      "label": {
+        "es": "5ª planta",
+        "en": "5th floor"
+      }
+    },
+    {
+      "value": "6ª",
+      "label": {
+        "es": "6ª planta",
+        "en": "6th floor"
+      }
+    },
+    {
+      "value": "7ª",
+      "label": {
+        "es": "7ª planta",
+        "en": "7th floor"
+      }
+    },
+    {
+      "value": "8ª",
+      "label": {
+        "es": "8ª planta",
+        "en": "8th floor"
+      }
+    },
+    {
+      "value": "9ª",
+      "label": {
+        "es": "9ª planta",
+        "en": "9th floor"
+      }
+    },
+    {
+      "value": "10ª",
+      "label": {
+        "es": "10ª planta",
+        "en": "10th floor"
+      }
+    },
+    {
+      "value": "11ª",
+      "label": {
+        "es": "11ª planta",
+        "en": "11th floor"
+      }
+    },
+    {
+      "value": "12ª",
+      "label": {
+        "es": "12ª planta",
+        "en": "12th floor"
+      }
+    },
+    {
+      "value": "13ª",
+      "label": {
+        "es": "13ª planta",
+        "en": "13th floor"
+      }
+    },
+    {
+      "value": "14ª",
+      "label": {
+        "es": "14ª planta",
+        "en": "14th floor"
+      }
+    },
+    {
+      "value": "15ª",
+      "label": {
+        "es": "15ª planta",
+        "en": "15th floor"
+      }
+    },
+    {
+      "value": "16ª",
+      "label": {
+        "es": "16ª planta",
+        "en": "16th floor"
+      }
+    },
+    {
+      "value": "17ª",
+      "label": {
+        "es": "17ª planta",
+        "en": "17th floor"
+      }
+    },
+    {
+      "value": "18ª",
+      "label": {
+        "es": "18ª planta",
+        "en": "18th floor"
+      }
+    },
+    {
+      "value": "20ª",
+      "label": {
+        "es": "20ª planta",
+        "en": "20th floor"
+      }
+    },
+    {
+      "value": "21ª",
+      "label": {
+        "es": "21ª planta",
+        "en": "21st floor"
+      }
+    },
+    {
+      "value": "27ª",
+      "label": {
+        "es": "27ª planta",
+        "en": "27th floor"
+      }
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "property_features",
+      "label": {
+        "es": "Características de la vivienda",
+        "en": "Property features"
+      },
+      "options": [
+        {
+          "key": "terrace",
+          "label": {
+            "es": "Terraza",
+            "en": "Terrace"
+          }
+        },
+        {
+          "key": "balconies",
+          "label": {
+            "es": "Balcones",
+            "en": "Balconies"
+          }
+        },
+        {
+          "key": "patio",
+          "label": {
+            "es": "Patio",
+            "en": "Patio"
+          }
+        },
+        {
+          "key": "garden",
+          "label": {
+            "es": "Jardín",
+            "en": "Garden"
+          }
+        },
+        {
+          "key": "swimming_pool",
+          "label": {
+            "es": "Piscina",
+            "en": "Swimming pool"
+          }
+        },
+        {
+          "key": "plot",
+          "label": {
+            "es": "Parcela",
+            "en": "Plot"
+          }
+        },
+        {
+          "key": "views",
+          "label": {
+            "es": "Vistas",
+            "en": "Views"
+          }
+        },
+        {
+          "key": "garage",
+          "label": {
+            "es": "Garaje",
+            "en": "Garage"
+          }
+        },
+        {
+          "key": "built_in_wardrobes",
+          "label": {
+            "es": "Armarios empotrados",
+            "en": "Built-in wardrobes"
+          }
+        },
+        {
+          "key": "heating",
+          "label": {
+            "es": "Calefacción",
+            "en": "Heating"
+          }
+        },
+        {
+          "key": "furnished",
+          "label": {
+            "es": "Amueblada",
+            "en": "Furnished"
+          }
+        },
+        {
+          "key": "equipped",
+          "label": {
+            "es": "Equipada",
+            "en": "Equipped"
+          }
+        },
+        {
+          "key": "appliances",
+          "label": {
+            "es": "Electrodomésticos",
+            "en": "Appliances"
+          }
+        },
+        {
+          "key": "concierge",
+          "label": {
+            "es": "Portero",
+            "en": "Concierge"
+          }
+        },
+        {
+          "key": "en_suite",
+          "label": {
+            "es": "Dormitorio en suite",
+            "en": "En-suite bedroom"
+          }
+        },
+        {
+          "key": "renovated",
+          "label": {
+            "es": "Reformado",
+            "en": "Renovated"
+          }
+        },
+        {
+          "key": "brand_new",
+          "label": {
+            "es": "A estrenar / nuevo",
+            "en": "Brand new"
+          }
+        },
+        {
+          "key": "needs_renovation",
+          "label": {
+            "es": "A reformar",
+            "en": "Needs renovation"
+          }
+        },
+        {
+          "key": "residential_complex",
+          "label": {
+            "es": "Urbanización",
+            "en": "Residential complex"
+          }
+        },
+        {
+          "key": "near_metro",
+          "label": {
+            "es": "Cerca del metro",
+            "en": "Near metro"
+          }
+        },
+        {
+          "key": "near_park",
+          "label": {
+            "es": "Cerca de un parque",
+            "en": "Near a park"
+          }
+        },
+        {
+          "key": "loft",
+          "label": {
+            "es": "Loft",
+            "en": "Loft"
+          }
+        }
+      ]
+    },
+    {
+      "key": "legal_and_listing",
+      "label": {
+        "es": "Situación legal y del anuncio",
+        "en": "Legal and listing status"
+      },
+      "options": [
+        {
+          "key": "squatted",
+          "label": {
+            "es": "Okupada",
+            "en": "Occupied by squatters"
+          }
+        },
+        {
+          "key": "bare_ownership",
+          "label": {
+            "es": "Nuda propiedad",
+            "en": "Bare ownership"
+          }
+        },
+        {
+          "key": "auction",
+          "label": {
+            "es": "Subasta",
+            "en": "Auction"
+          }
+        },
+        {
+          "key": "tenanted",
+          "label": {
+            "es": "Alquilada (con inquilinos)",
+            "en": "Tenanted"
+          }
+        },
+        {
+          "key": "joint_ownership",
+          "label": {
+            "es": "Proindiviso",
+            "en": "Undivided co-ownership"
+          }
+        },
+        {
+          "key": "price_reduced",
+          "label": {
+            "es": "Precio rebajado",
+            "en": "Price reduced"
+          }
+        },
+        {
+          "key": "private_sellers_only",
+          "label": {
+            "es": "Solo particulares",
+            "en": "Private parties only"
+          }
+        },
+        {
+          "key": "no_agencies",
+          "label": {
+            "es": "Abstenerse agencias",
+            "en": "No agencies"
+          }
+        },
+        {
+          "key": "exclusive_listing",
+          "label": {
+            "es": "Exclusiva",
+            "en": "Exclusive listing"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,15 @@
 """Los archivos versionados coinciden con lo que generan los scripts desde data/.
 
 Solo se ejecutan si existen los CSV locales (no están en el repositorio ni en
-la CI). Detectan un catálogo o unos fixtures desactualizados o editados a mano.
+la CI). Detectan un catálogo, unos fixtures o un informe del modelo
+desactualizados o editados a mano.
 """
 
 import json
 
 import build_catalog
 import build_fixtures
+import build_model_report
 import pandas as pd
 import pytest
 from preprocesado_original import (
@@ -16,6 +18,7 @@ from preprocesado_original import (
     anadir_columnas_tag,
     calcular_etiquetas_utiles,
 )
+from salida_json import serializar
 
 from tasador.config import RUTA_CATALOGO
 
@@ -70,3 +73,13 @@ def test_filas_del_fixture_son_identicas_a_las_del_notebook(filas_referencia):
                 assert pd.isna(original[columna]), f"{fila['indice_test']} {columna}"
             else:
                 assert original[columna] == valor, f"{fila['indice_test']} {columna}"
+
+
+@sin_datos
+def test_informe_del_modelo_versionado_coincide_y_es_determinista(modelo):
+    train = pd.read_csv(RUTA_TRAIN)
+    test = pd.read_csv(RUTA_TEST)
+    primero = serializar(build_model_report.construir_informe(modelo, train, test))
+    segundo = serializar(build_model_report.construir_informe(modelo, train, test))
+    assert primero == segundo
+    assert build_model_report.RUTA_INFORME.read_text(encoding="utf-8") == primero

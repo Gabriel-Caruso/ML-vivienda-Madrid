@@ -29,7 +29,7 @@ El margen de la horquilla es el error relativo del modelo en el tramo de precio 
 
 | Precio estimado | Error relativo aplicado |
 |---|---:|
-| Menos de 250.000 € | 16 % |
+| Menos de 250.000 € | 17 % |
 | 250.000 - 435.360 € | 15 % |
 | 435.360 - 835.600 € | 16 % |
 | 835.600 - 1.490.000 € | 15 % |

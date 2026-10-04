@@ -193,9 +193,9 @@ def test_tramo_se_elige_con_el_precio_redondeado(modelo):
 def test_redondeo_de_precio_y_extremos(modelo):
     resultado = Predictor(ModeloConPrecioFijo(modelo, 100_000.4)).predecir(peticion())
     assert resultado.precio == 100_000
-    assert resultado.margen == 0.16
-    assert resultado.minimo == 84_000
-    assert resultado.maximo == 116_000
+    assert resultado.margen == 0.17
+    assert resultado.minimo == 83_000
+    assert resultado.maximo == 117_000
 
 
 # Compatibilidad entre modelo y dominio

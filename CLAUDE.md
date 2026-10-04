@@ -27,7 +27,7 @@ Servicio web que estima el precio de venta de una vivienda en Madrid con un mode
 - pytest para tests. Ruff para lint y formato.
 - GitHub Actions para integración continua (Ruff + pytest en cada push).
 - Despliegue en Render (plan gratuito) configurado con `render.yaml`.
-- Fase 2 (NO ahora): interfaz servida por la propia app FastAPI (Jinja2 + CSS + JS sin build), bilingüe español/inglés.
+- Fase 2: interfaz como archivos estáticos puros (HTML + CSS + JS sin build, sin Jinja2) en src/tasador/web/. FastAPI la sirve en local; en producción se publica como Static Site de Render, separado del Web Service de la API.
 
 ## Arquitectura
 Una sola aplicación, un solo paquete Python, con capas. NUNCA crees carpetas `frontend/` y `backend/`: la interfaz será una capa más del paquete (`src/tasador/web/`).
@@ -84,3 +84,8 @@ No des una tarea por terminada si algo falla. Si un test falla y no sabes por qu
 - Decisiones añadidas a `docs/DECISIONES.md`.
 - Dudas o incertidumbres pendientes.
 - Mensaje de commit propuesto (no lo ejecutes).
+
+## Excepción a las reglas globales de ML (solo este proyecto)
+- Puedes cargar el modelo y predecir sobre data/test.csv para generar los datos de los gráficos de la web.
+- Sigue prohibido reentrenar, modificar o volver a guardar el modelo.
+- Las cifras que calcules deben coincidir con las documentadas; si no coinciden, para y avísame.

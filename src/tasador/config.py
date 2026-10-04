@@ -15,6 +15,10 @@ RUTA_MODELO = RAIZ_PROYECTO / "models" / "catboost_madrid.joblib"
 # Catálogo generado por scripts/build_catalog.py; vive dentro del paquete
 RUTA_CATALOGO = Path(__file__).resolve().parent / "domain" / "catalogo.json"
 
+# Interfaz web estática (fase 2) y datos precalculados que consume
+RUTA_WEB = Path(__file__).resolve().parent / "web"
+RUTA_DATOS_WEB = RUTA_WEB / "datos"
+
 NOMBRE_APP = "Tasador de vivienda en Madrid"
 VERSION_APP = version("tasador-madrid")
 
@@ -22,10 +26,11 @@ VERSION_APP = version("tasador-madrid")
 # Cada tramo es (límite inferior incluido en euros, margen relativo) y se aplica
 # hasta el límite inferior del siguiente. El primero empieza en 0 y el último no
 # tiene techo, de modo que los precios fuera de la tabla usan el tramo más cercano.
-# Valores: error relativo por tramo del README de ML-idealista, redondeado
-# (docs/DECISIONES.md, D-018).
+# Valores: error relativo por tramo (MAE del tramo / precio mediano del tramo,
+# quintiles de precio real en test) calculado con el modelo desplegado y
+# redondeado. Coinciden con web/datos/informe_modelo.json (D-018, D-029).
 TRAMOS_ERROR = (
-    (0, 0.16),
+    (0, 0.17),
     (250_000, 0.15),
     (435_360, 0.16),
     (835_600, 0.15),

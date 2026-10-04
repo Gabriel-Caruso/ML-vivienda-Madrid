@@ -1,0 +1,344 @@
+{
+  "arbol": 0,
+  "arboles_en_el_modelo": 2044,
+  "profundidad": 9,
+  "hojas": 512,
+  "niveles": [
+    {
+      "variable": "tag_finca",
+      "tipo": "binaria",
+      "umbral": 0.5,
+      "texto": "tag_finca > 0.5"
+    },
+    {
+      "variable": "tag_suite",
+      "tipo": "binaria",
+      "umbral": 0.5,
+      "texto": "tag_suite > 0.5"
+    },
+    {
+      "variable": "ascensor_limpio",
+      "tipo": "ctr",
+      "umbral": 7.0,
+      "texto": "ctr(ascensor) > 7"
+    },
+    {
+      "variable": "zona",
+      "tipo": "ctr",
+      "umbral": 3.0,
+      "texto": "ctr(zona) > 3"
+    },
+    {
+      "variable": "zona",
+      "tipo": "ctr",
+      "umbral": 12.0,
+      "texto": "ctr(zona) > 12"
+    },
+    {
+      "variable": "metros",
+      "tipo": "numerica",
+      "umbral": 69.5,
+      "texto": "metros > 69.5"
+    },
+    {
+      "variable": "metros",
+      "tipo": "numerica",
+      "umbral": 234.5,
+      "texto": "metros > 234.5"
+    },
+    {
+      "variable": "zona",
+      "tipo": "ctr",
+      "umbral": 7.0,
+      "texto": "ctr(zona) > 7"
+    },
+    {
+      "variable": "metros",
+      "tipo": "numerica",
+      "umbral": 113.5,
+      "texto": "metros > 113.5"
+    }
+  ],
+  "recorridos": [
+    {
+      "indice_test": 124,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "indice_test": 364,
+      "ramas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 398,
+      "ramas": [
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "indice_test": 430,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "indice_test": 778,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "indice_test": 819,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 846,
+      "ramas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 890,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "indice_test": 934,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "indice_test": 1101,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 1197,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "indice_test": 1351,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 1400,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 1523,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "indice_test": 1821,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 1892,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "indice_test": 2050,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "indice_test": 2105,
+      "ramas": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "indice_test": 2131,
+      "ramas": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "indice_test": 2218,
+      "ramas": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1
+      ]
+    }
+  ]
+}

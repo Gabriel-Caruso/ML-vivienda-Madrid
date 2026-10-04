@@ -13,6 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets |
 
 ---
 
@@ -189,17 +190,17 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada. Implementada en `config.py` (`TRAMOS_ERROR`) y `services/horquilla.py`.
 - **Qué:** el margen de la horquilla depende del tramo en que cae el precio predicho, con el error relativo de cada tramo, no con un porcentaje fijo.
-- **Valores (README de ML-idealista, error relativo redondeado):**
+- **Valores:** error relativo por tramo del modelo desplegado, redondeado (cálculo en D-029):
 
   | Tramo de precio predicho (€) | Error relativo |
   |---|---:|
-  | menos de 250.000 | 16 % |
+  | menos de 250.000 | 17 % |
   | 250.000 - 435.360 | 15 % |
   | 435.360 - 835.600 | 16 % |
   | 835.600 - 1.490.000 | 15 % |
   | 1.490.000 o más | 24 % |
 
-- **Validez:** las métricas globales de ese README (MAE 181.256 €) no coinciden con las indicadas para el modelo joblib (MAE 180.710 €), lo que hizo dudar de si la tabla correspondía al modelo desplegado. El responsable del proyecto confirmó que los valores por tramo son correctos y se usan redondeados.
+- **Historia:** la primera versión usaba la tabla del README de ML-idealista (16 / 15 / 16 / 15 / 24 %). En la fase 2 se comprobó que esa tabla sale de `main.ipynb`, cuyo modelo final es el pkl de 70 columnas (D-007), no el joblib desplegado. Recalculada con el joblib, solo cambia el primer tramo: 16,70 % frente a 16,42 %, que redondea a 17 %. El responsable del proyecto aprobó cambiar la API a 17 % para que la horquilla y el gráfico A coincidan. `build_model_report.py` falla si alguna vez dejan de coincidir.
 - **Fuera del rango de la tabla (aprobado):** se aplica el tramo más cercano (el primero por debajo de 35.000 € y el último por encima de 13.000.000 €). Un precio exactamente en un corte pertenece al tramo superior.
 
 ## D-019. Validación en el esquema con códigos de error propios
@@ -288,8 +289,68 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Qué:** en español. Incluye qué es, el origen del modelo, las métricas en test indicadas por el responsable (MAE 180.710 €, RMSE 439.765 €, R² 0,863), la tabla de tramos, cómo ejecutarlo en local con uv, los endpoints con ejemplos reales, la tabla de códigos de error, el despliegue y el arranque en frío de Render (15 minutos sin tráfico, alrededor de un minuto para despertar), las limitaciones y la autoría (Ramiro Caruso y Ana Manzanares, con el EDA acreditado a Ana).
 - **Fecha de los datos:** anuncios de Idealista Madrid de 2025, confirmado por el responsable del proyecto. El README lo indica en el origen del modelo y en las limitaciones.
 
+## D-028. Arquitectura de la interfaz web y URL de la API
+
+- **Estado:** aprobada en el paso 0 de la fase 2. Implementación en el paso 2.
+- **Qué:** archivos estáticos puros en `src/tasador/web/` (HTML, CSS y JavaScript sin build, sin frameworks ni plantillas). En local los sirve la propia app FastAPI en `/`; en producción se publican además como Static Site de Render.
+- **`GET /`:** pasa a servir la web. La información JSON de la fase 1 (nombre, versión, enlaces) se mueve a `GET /api/v1/` y `HEAD /` sigue respondiendo 200. Es un cambio de contrato aprobado expresamente.
+- **La API sirve la web siempre**, también en el Web Service de producción: un solo camino de código. Los usuarios entran por el Static Site.
+- **URL base de la API:** `web/config.js` versionado con `window.TASADOR_CONFIG = { apiBaseUrl: "", portfolioUrl: "" }` (cadena vacía = mismo origen). En el Static Site, el comando de build sobrescribe ese archivo con las variables `API_BASE_URL` y `PORTFOLIO_URL` del panel, de modo que la URL cambia sin tocar el código y el enlace al portfolio queda oculto mientras esté vacío.
+- **CORS:** `CORSMiddleware` de Starlette (sin dependencias nuevas) con los orígenes de la variable `ALLOWED_ORIGINS`, separados por comas.
+- **Incertidumbre:** la documentación de Render no dice de forma explícita que las variables de entorno estén disponibles en el build de un Static Site; la guía de React en Render las usa en el comando de build. Se verificará en el primer despliegue.
+- **Alternativa descartada:** reescritura `/api/*` del Static Site hacia la API (evitaría CORS). La documentación no aclara los tiempos de espera ni el soporte de POST, y la API tarda unos 50 s en despertar.
+- **Fuentes:** https://render.com/docs/static-sites, https://render.com/docs/blueprint-spec, https://render.com/docs/deploy-create-react-app, https://render.com/docs/redirects-rewrites
+
+## D-029. Informe del modelo para los gráficos
+
+- **Estado:** aprobada.
+- **Qué:** `scripts/build_model_report.py` carga el joblib, predice sobre `data/test.csv` (excepción de este proyecto a la regla de no evaluar) y escribe `web/datos/informe_modelo.json`. Es determinista (misma huella en dos ejecuciones) y un test local compara el archivo versionado con el generado.
+- **Métricas verificadas:** joblib MAE 180.709,77 €, RMSE 439.764,62 €, R² 0,8635, idénticas a la salida guardada de `modeling.ipynb` (celda 36). Las de `main.ipynb` (MAE 181.256,21 €) corresponden al pkl de 70 columnas: `main.ipynb` calcula los tags con el dataset completo antes de separar train y test, y por eso aparece `tag_seguridad`. El script falla si las métricas no coinciden con las documentadas.
+- **Error relativo (gráfico A):** no está calculado en ningún notebook. `main.ipynb` (celda 96) calcula, por quintil de precio real (`pd.qcut(y_test, q=5)`), el precio mediano y el MAE; el porcentaje del README es MAE del tramo / precio mediano del tramo. Con el joblib: 16,70 %, 14,78 %, 15,53 %, 15,48 % y 23,60 %. Los cortes son los de la horquilla de la API, y el script comprueba que los porcentajes redondeados coinciden con `TRAMOS_ERROR`.
+- **Gráfico B:** los 2.237 pares real/predicho de test en euros enteros, ordenados por precio real.
+- **Gráfico C:** `get_feature_importance()` del CatBoost final (metros 41,675 %, zona 23,129 %, barrio 7,852 %, como en `modeling.ipynb`, celda 38). Los 9 campos principales llevan su etiqueta es/en del dominio; las binarias se muestran con el nombre de la columna. La web muestra las 10 variables más importantes y agrupa el resto en una sola barra «otras variables…» / «other features…» (aprobado).
+- **Gráfico D:** no se recalcula (requeriría reentrenar). Serie de `modeling.ipynb`, la historia del modelo desplegado, con los valores de sus salidas guardadas: regresión lineal 356.861 €, XGBoost 220.516 €, LightGBM 223.028 €, CatBoost 201.014 €, CatBoost con log del precio 190.149 €, + Optuna 185.803 €, + tags 178.584 € (validación cruzada de 5 folds) y modelo final 180.710 € (test). Cada punto guarda su celda de origen y su conjunto (`cv` o `test`), que la web marcará distinto.
+- **Alternativa descartada:** la comparativa de `main.ipynb`. Le falta la salida del CatBoost sin optimizar y termina en el otro modelo.
+
+## D-030. Árbol del fondo animado
+
+- **Estado:** aprobada (árbol 0).
+- **Qué:** `scripts/export_tree.py` escribe `web/datos/arbol.json` con los 9 cortes del árbol 0 y el recorrido de las 20 viviendas de los fixtures. No necesita `data/`, así que su determinismo y su vigencia se comprueban también en la CI.
+- **Funciones de CatBoost:** `CatBoostRegressor.plot_tree(tree_idx, pool)` para la descripción de cada corte (solo se usa el texto del `graphviz.Digraph`; no hace falta el programa Graphviz) y `calc_leaf_indexes(pool, ntree_start, ntree_end)` para la hoja de cada vivienda.
+- **Orden de niveles y bits:** el de `plot_tree`, de la raíz hacia abajo. El nivel L corresponde al bit (profundidad - 1 - L) del índice de hoja y la rama "Yes" al 1. Verificado con las 2.237 filas de test en los cinco niveles numéricos o binarios (coincidencia del 100 %), y comprobado de nuevo en cada ejecución del script, que falla si no se cumple. La exportación JSON del modelo lista los cortes en el orden contrario; en un árbol simétrico ambos órdenes dan las mismas 512 hojas.
+- **Cortes categóricos:** CatBoost no compara la categoría sino un estadístico del precio por categoría (CTR) discretizado. Se muestran como `ctr(zona) > 3`, sin inventar condiciones del tipo `zona = centro`.
+- **Por qué el árbol 0:** es el primero que aprendió el modelo, fácil de justificar. Alternativa descartada: elegir el más legible entre los primeros 50.
+- **Fuentes:** https://catboost.ai/docs/en/concepts/python-reference_catboostregressor_plot_tree, https://catboost.ai/docs/en/concepts/python-reference_catboost_calc_leaf_indexes, https://github.com/catboost/tutorials/blob/master/model_analysis/model_export_as_json_tutorial.ipynb
+
+## D-031. Catálogo estático para el formulario
+
+- **Estado:** aprobada.
+- **Qué:** `scripts/build_web_catalog.py` guarda en `web/datos/catalogo.json` exactamente la respuesta de `GET /api/v1/metadata`. Un test lo compara con la respuesta real de la API, y otro con lo que genera el dominio.
+- **Por qué:** el formulario funciona al instante aunque la API esté dormida.
+
+## D-032. Fuentes
+
+- **Estado:** aprobada. Se alojan en el proyecto en el paso 3, con sus licencias.
+- **Qué:** IBM VGA 9x16 en su variante "Plus" (Ultimate Oldschool PC Font Pack 2.2, de VileR) para títulos, marca y bordes; IBM Plex Mono para el resto.
+- **Licencias:** Oldschool PC Font Pack, CC BY-SA 4.0: exige atribución ("VileR", con enlace a https://int10h.org/oldschool-pc-fonts/), que irá en el pie. IBM Plex Mono, SIL OFL 1.1.
+- **Cobertura comprobada:** IBM VGA 9x16 Plus tiene tildes, ñ, ª, € y caracteres de caja. La variante "437" no tiene ÁÍÓÚ ni €.
+- **Alternativa descartada:** VT323 (OFL 1.1), sin caracteres de caja.
+- **Incertidumbre:** se entiende que la cláusula ShareAlike solo afecta a modificaciones de la fuente, no a la web que la usa. No es asesoramiento legal.
+
+## D-033. Paleta
+
+- **Estado:** aprobada (opción A, P1 clásico).
+- **Qué:** fondo `#060a06`, verde principal `#33ff66`, verde atenuado `#1f9d45`, verde tenue `#0f3d1c`. Contraste WCAG sobre el fondo: principal 14,8; atenuado 5,7 (válido para texto secundario); tenue 1,6, solo decorativo (árbol y rejilla).
+- **Errores:** vídeo inverso (texto en color de fondo sobre bloque verde principal) con prefijo `ERROR:`. **Foco:** contorno de 2 px en verde principal y vídeo inverso en los botones.
+
+## D-034. Casas y chalets en el formulario
+
+- **Estado:** aprobada.
+- **Verificado:** en `data/train.csv`, las 543 filas de los cinco tipos de casa o chalet tienen planta, ascensor y localización siempre a `NO_APLICA`.
+- **Qué:** si el tipo es de casa o chalet, el formulario oculta esos tres campos y los envía como `null`. La API no acepta `"NO_APLICA"` como entrada (D-019) pero convierte `null` en `NO_APLICA` para esos tipos (D-014), así que el modelo recibe exactamente lo mismo sin cambiar el contrato.
+
 ---
 
 ## Pendiente de confirmar
 
-- Nada pendiente al cierre de la fase 1.
+- Fase 2: comprobar en el primer despliegue del Static Site que `API_BASE_URL` está disponible en el comando de build (D-028).

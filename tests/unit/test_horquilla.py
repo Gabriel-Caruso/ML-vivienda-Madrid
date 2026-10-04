@@ -6,9 +6,9 @@ from tasador.config import TRAMOS_ERROR
 from tasador.services.horquilla import calcular_horquilla, comprobar_tramos, margen_para
 
 
-def test_tramos_configurados_son_los_del_readme():
+def test_tramos_configurados_son_los_del_modelo_desplegado():
     assert TRAMOS_ERROR == (
-        (0, 0.16),
+        (0, 0.17),
         (250_000, 0.15),
         (435_360, 0.16),
         (835_600, 0.15),
@@ -19,7 +19,7 @@ def test_tramos_configurados_son_los_del_readme():
 @pytest.mark.parametrize(
     ("precio", "margen"),
     [
-        (188_604, 0.16),
+        (188_604, 0.17),
         (335_000, 0.15),
         (599_900, 0.16),
         (1_150_000, 0.15),
@@ -33,7 +33,7 @@ def test_margen_en_cada_tramo(precio, margen):
 @pytest.mark.parametrize(
     ("precio", "margen"),
     [
-        (249_999.99, 0.16),
+        (249_999.99, 0.17),
         (250_000, 0.15),
         (435_360, 0.16),
         (835_600, 0.15),
@@ -46,7 +46,7 @@ def test_limite_pertenece_al_tramo_superior(precio, margen):
 
 
 def test_precio_por_debajo_de_la_tabla_usa_el_primer_tramo():
-    assert margen_para(20_000) == 0.16
+    assert margen_para(20_000) == 0.17
 
 
 def test_precio_por_encima_de_la_tabla_usa_el_ultimo_tramo():
