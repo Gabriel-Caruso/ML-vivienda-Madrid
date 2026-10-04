@@ -4,6 +4,7 @@ Las rutas se calculan a partir de la ubicación de este archivo, nunca del
 directorio desde el que se lanza el programa.
 """
 
+import os
 from importlib.metadata import version
 from pathlib import Path
 
@@ -18,6 +19,25 @@ RUTA_CATALOGO = Path(__file__).resolve().parent / "domain" / "catalogo.json"
 # Interfaz web estática (fase 2) y datos precalculados que consume
 RUTA_WEB = Path(__file__).resolve().parent / "web"
 RUTA_DATOS_WEB = RUTA_WEB / "datos"
+
+# Orígenes que pueden llamar a la API desde otro dominio (CORS), separados por
+# comas. En producción, la URL del Static Site. Vacío: solo el propio origen.
+VARIABLE_ORIGENES_PERMITIDOS = "ALLOWED_ORIGINS"
+
+
+def leer_origenes_permitidos(valor: str) -> list[str]:
+    """Convierte "https://a.com, https://b.com" en una lista, sin vacíos ni barra final."""
+    origenes = []
+    for parte in valor.split(","):
+        origen = parte.strip().rstrip("/")
+        if origen:
+            origenes.append(origen)
+    return origenes
+
+
+def origenes_desde_entorno() -> list[str]:
+    return leer_origenes_permitidos(os.environ.get(VARIABLE_ORIGENES_PERMITIDOS, ""))
+
 
 NOMBRE_APP = "Tasador de vivienda en Madrid"
 VERSION_APP = version("tasador-madrid")

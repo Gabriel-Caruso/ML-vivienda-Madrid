@@ -25,6 +25,7 @@ from tasador.domain.etiquetas import (
     etiqueta_planta,
 )
 from tasador.domain.rangos import RANGO_BANOS, RANGO_HABITACIONES, RANGO_METROS, Rango
+from tasador.domain.reglas import TIPOS_CASA_O_CHALET
 from tasador.domain.tags import ETIQUETAS_GRUPO, OPCIONES_BINARIAS
 from tasador.schemas.metadata import (
     Campo,
@@ -35,6 +36,7 @@ from tasador.schemas.metadata import (
     OpcionBinaria,
     RangoNumerico,
     RespuestaMetadata,
+    TipoInmueble,
 )
 
 CAMPOS_OBLIGATORIOS = (CAMPO_METROS, CAMPO_ZONA, CAMPO_BARRIO, CAMPO_TIPO)
@@ -97,6 +99,20 @@ def construir_opciones(valores: tuple[str, ...], etiquetas: dict[str, Etiqueta])
     return opciones
 
 
+def construir_tipos_inmueble(tipos: tuple[str, ...]) -> list[TipoInmueble]:
+    """Tipos con su etiqueta y si son casa o chalet (regla del preprocesado)."""
+    resultado = []
+    for tipo in tipos:
+        resultado.append(
+            TipoInmueble(
+                value=tipo,
+                label=a_etiqueta(ETIQUETAS_TIPO_INMUEBLE[tipo]),
+                is_house=tipo in TIPOS_CASA_O_CHALET,
+            )
+        )
+    return resultado
+
+
 def construir_plantas(plantas: tuple[str, ...]) -> list[Opcion]:
     opciones = []
     for planta in valores_seleccionables(plantas):
@@ -124,7 +140,7 @@ def construir_metadata() -> RespuestaMetadata:
     return RespuestaMetadata(
         fields=construir_campos(),
         districts=construir_distritos(),
-        property_types=construir_opciones(catalogo.tipos_inmueble, ETIQUETAS_TIPO_INMUEBLE),
+        property_types=construir_tipos_inmueble(catalogo.tipos_inmueble),
         lift=construir_opciones(valores_seleccionables(catalogo.ascensor), ETIQUETAS_ASCENSOR),
         position=construir_opciones(
             valores_seleccionables(catalogo.localizacion), ETIQUETAS_LOCALIZACION

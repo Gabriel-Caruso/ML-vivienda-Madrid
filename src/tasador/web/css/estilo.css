@@ -1,0 +1,84 @@
+/* Estilos mínimos de estructura (paso 2). La estética de terminal llega en el paso 3. */
+
+body {
+  margin: 0;
+  padding: 1rem;
+  font-family: monospace;
+  line-height: 1.5;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.cabecera,
+.barra-estado {
+  display: flex;
+  gap: 1ch;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.registro {
+  list-style: none;
+  padding: 0;
+}
+
+.trabajo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 60rem) {
+  .trabajo {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.campo {
+  margin-bottom: 0.75rem;
+}
+
+.campo label {
+  display: block;
+}
+
+.combobox {
+  position: relative;
+}
+
+.combobox ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid;
+}
+
+.combobox li[aria-selected="true"] {
+  outline: 1px solid;
+}
+
+.error-campo,
+.errores-formulario {
+  font-weight: bold;
+}
+
+.enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2ch;
+  list-style: none;
+  padding: 0;
+}

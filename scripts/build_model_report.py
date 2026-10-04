@@ -39,8 +39,11 @@ from tasador.domain.campos import CAMPOS
 RUTA_INFORME = RUTA_DATOS_WEB / "informe_modelo.json"
 
 # Salida guardada de modeling.ipynb, celda 36 (modelo final contra test)
+# Se comparan con la precisión con que están documentadas; el informe guarda el
+# R² con más decimales para que la web lo pueda redondear sin redondear dos veces.
 METRICAS_DOCUMENTADAS = {"mae": 180_709.77, "rmse": 439_764.62, "r2": 0.8635}
-DECIMALES_METRICAS = {"mae": 2, "rmse": 2, "r2": 4}
+DECIMALES_DOCUMENTADOS = {"mae": 2, "rmse": 2, "r2": 4}
+DECIMALES_METRICAS = {"mae": 2, "rmse": 2, "r2": 6}
 
 NUMERO_TRAMOS = 5
 
@@ -84,7 +87,7 @@ def calcular_metricas(reales: np.ndarray, predichos: np.ndarray) -> dict:
 
 def comprobar_metricas(metricas: dict) -> None:
     for nombre, documentada in METRICAS_DOCUMENTADAS.items():
-        if metricas[nombre] != documentada:
+        if round(metricas[nombre], DECIMALES_DOCUMENTADOS[nombre]) != documentada:
             raise InformeIncoherenteError(
                 f"{nombre} calculado {metricas[nombre]} distinto del documentado {documentada}"
             )

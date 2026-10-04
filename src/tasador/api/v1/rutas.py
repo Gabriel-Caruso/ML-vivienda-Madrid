@@ -10,10 +10,11 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
 from tasador.api.dependencias import obtener_predictor
+from tasador.config import NOMBRE_APP, VERSION_APP
 from tasador.schemas.errores import CodigoError, DetalleError, RespuestaErrores
 from tasador.schemas.metadata import RespuestaMetadata
 from tasador.schemas.prediccion import PeticionPrediccion, RespuestaPrediccion
-from tasador.schemas.servicio import RespuestaSalud
+from tasador.schemas.servicio import RespuestaRaiz, RespuestaSalud
 from tasador.services.metadata import construir_metadata
 from tasador.services.predictor import Predictor
 
@@ -37,6 +38,20 @@ def respuesta_modelo_no_cargado() -> JSONResponse:
     )
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content=respuesta.model_dump(mode="json")
+    )
+
+
+@router.get("/", response_model=RespuestaRaiz, summary="Información del servicio")
+def informacion() -> RespuestaRaiz:
+    return RespuestaRaiz(
+        name=NOMBRE_APP,
+        version=VERSION_APP,
+        docs="/docs",
+        endpoints={
+            "health": f"{PREFIJO_V1}/health",
+            "metadata": f"{PREFIJO_V1}/metadata",
+            "predict": f"{PREFIJO_V1}/predict",
+        },
     )
 
 

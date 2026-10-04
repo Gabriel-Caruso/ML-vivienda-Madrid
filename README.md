@@ -60,7 +60,8 @@ uv run pytest
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/` | Nombre, versión y enlaces |
+| GET | `/` | Interfaz web (archivos de `src/tasador/web/`) |
+| GET | `/api/v1/` | Nombre, versión y enlaces de la API |
 | GET | `/api/v1/health` | Estado del servicio y del modelo |
 | GET | `/api/v1/metadata` | Catálogo para construir el formulario |
 | POST | `/api/v1/predict` | Precio estimado con su horquilla |

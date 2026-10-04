@@ -13,7 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
-| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web |
 
 ---
 
@@ -291,13 +291,15 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 ## D-028. Arquitectura de la interfaz web y URL de la API
 
-- **Estado:** aprobada en el paso 0 de la fase 2. Implementación en el paso 2.
+- **Estado:** aprobada en el paso 0 de la fase 2. Implementada en el paso 2.
 - **Qué:** archivos estáticos puros en `src/tasador/web/` (HTML, CSS y JavaScript sin build, sin frameworks ni plantillas). En local los sirve la propia app FastAPI en `/`; en producción se publican además como Static Site de Render.
 - **`GET /`:** pasa a servir la web. La información JSON de la fase 1 (nombre, versión, enlaces) se mueve a `GET /api/v1/` y `HEAD /` sigue respondiendo 200. Es un cambio de contrato aprobado expresamente.
 - **La API sirve la web siempre**, también en el Web Service de producción: un solo camino de código. Los usuarios entran por el Static Site.
+- **Cómo se sirve (`api/raiz.py`):** `index.html` en `/` y cada carpeta de `web/` montada en su ruta (`/css`, `/js`, `/datos`, `/i18n`) más una ruta por archivo de la raíz (`/config.js`). No se monta un `StaticFiles` sobre `/` porque capturaría las rutas de la API: un `DELETE /api/v1/predict` caería en los archivos estáticos y daría un 405 sin la cabecera `Allow` correcta. La web se registra después de la API.
 - **URL base de la API:** `web/config.js` versionado con `window.TASADOR_CONFIG = { apiBaseUrl: "", portfolioUrl: "" }` (cadena vacía = mismo origen). En el Static Site, el comando de build sobrescribe ese archivo con las variables `API_BASE_URL` y `PORTFOLIO_URL` del panel, de modo que la URL cambia sin tocar el código y el enlace al portfolio queda oculto mientras esté vacío.
-- **CORS:** `CORSMiddleware` de Starlette (sin dependencias nuevas) con los orígenes de la variable `ALLOWED_ORIGINS`, separados por comas.
-- **Incertidumbre:** la documentación de Render no dice de forma explícita que las variables de entorno estén disponibles en el build de un Static Site; la guía de React en Render las usa en el comando de build. Se verificará en el primer despliegue.
+- **CORS:** `CORSMiddleware` de Starlette (sin dependencias nuevas) con los orígenes de la variable `ALLOWED_ORIGINS`, separados por comas (se ignoran espacios y la barra final). Solo `GET` y `POST` y la cabecera `Content-Type`. Sin la variable no se admite ningún origen ajeno. `create_app(origenes_permitidos=...)` permite fijarlos en los tests. Limitación conocida: las respuestas 500 las genera el middleware más externo de Starlette, sin cabeceras CORS; el navegador las verá como error de red, y la web muestra el mismo mensaje.
+- **Verificado en Render:** la documentación no dice de forma explícita que las variables de entorno estén disponibles en el build de un Static Site, así que se comprobó en el primer despliegue (https://ml-vivienda-madrid-1.onrender.com): el `config.js` publicado contiene `apiBaseUrl: "https://ml-vivienda-madrid.onrender.com"`, tomado de `API_BASE_URL`.
+- **URLs de producción:** API (Web Service) https://ml-vivienda-madrid.onrender.com; web (Static Site) https://ml-vivienda-madrid-1.onrender.com. El sufijo `-1` lo añadió Render porque el nombre ya estaba en uso.
 - **Alternativa descartada:** reescritura `/api/*` del Static Site hacia la API (evitaría CORS). La documentación no aclara los tiempos de espera ni el soporte de POST, y la API tarda unos 50 s en despertar.
 - **Fuentes:** https://render.com/docs/static-sites, https://render.com/docs/blueprint-spec, https://render.com/docs/deploy-create-react-app, https://render.com/docs/redirects-rewrites
 
@@ -305,7 +307,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada.
 - **Qué:** `scripts/build_model_report.py` carga el joblib, predice sobre `data/test.csv` (excepción de este proyecto a la regla de no evaluar) y escribe `web/datos/informe_modelo.json`. Es determinista (misma huella en dos ejecuciones) y un test local compara el archivo versionado con el generado.
-- **Métricas verificadas:** joblib MAE 180.709,77 €, RMSE 439.764,62 €, R² 0,8635, idénticas a la salida guardada de `modeling.ipynb` (celda 36). Las de `main.ipynb` (MAE 181.256,21 €) corresponden al pkl de 70 columnas: `main.ipynb` calcula los tags con el dataset completo antes de separar train y test, y por eso aparece `tag_seguridad`. El script falla si las métricas no coinciden con las documentadas.
+- **Métricas verificadas:** joblib MAE 180.709,77 €, RMSE 439.764,62 €, R² 0,8635 (el informe guarda 0,863476: con solo cuatro decimales la web redondeaba dos veces y mostraba 0,864 en lugar de 0,863), idénticas a la salida guardada de `modeling.ipynb` (celda 36). Las de `main.ipynb` (MAE 181.256,21 €) corresponden al pkl de 70 columnas: `main.ipynb` calcula los tags con el dataset completo antes de separar train y test, y por eso aparece `tag_seguridad`. El script falla si las métricas no coinciden con las documentadas.
 - **Error relativo (gráfico A):** no está calculado en ningún notebook. `main.ipynb` (celda 96) calcula, por quintil de precio real (`pd.qcut(y_test, q=5)`), el precio mediano y el MAE; el porcentaje del README es MAE del tramo / precio mediano del tramo. Con el joblib: 16,70 %, 14,78 %, 15,53 %, 15,48 % y 23,60 %. Los cortes son los de la horquilla de la API, y el script comprueba que los porcentajes redondeados coinciden con `TRAMOS_ERROR`.
 - **Gráfico B:** los 2.237 pares real/predicho de test en euros enteros, ordenados por precio real.
 - **Gráfico C:** `get_feature_importance()` del CatBoost final (metros 41,675 %, zona 23,129 %, barrio 7,852 %, como en `modeling.ipynb`, celda 38). Los 9 campos principales llevan su etiqueta es/en del dominio; las binarias se muestran con el nombre de la columna. La web muestra las 10 variables más importantes y agrupa el resto en una sola barra «otras variables…» / «other features…» (aprobado).
@@ -347,10 +349,30 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada.
 - **Verificado:** en `data/train.csv`, las 543 filas de los cinco tipos de casa o chalet tienen planta, ascensor y localización siempre a `NO_APLICA`.
-- **Qué:** si el tipo es de casa o chalet, el formulario oculta esos tres campos y los envía como `null`. La API no acepta `"NO_APLICA"` como entrada (D-019) pero convierte `null` en `NO_APLICA` para esos tipos (D-014), así que el modelo recibe exactamente lo mismo sin cambiar el contrato.
+- **Qué:** si el tipo es de casa o chalet, el formulario oculta esos tres campos y los envía como `null`. La web sabe qué tipos son casa o chalet por el campo `is_house` de cada tipo en `GET /api/v1/metadata`, calculado desde `TIPOS_CASA_O_CHALET` del dominio: cambio aditivo del contrato, aprobado, que evita duplicar la regla en el JavaScript. La API no acepta `"NO_APLICA"` como entrada (D-019) pero convierte `null` en `NO_APLICA` para esos tipos (D-014), así que el modelo recibe exactamente lo mismo sin cambiar el contrato.
+
+## D-035. Lógica de la interfaz web
+
+- **Estado:** aprobada (requisitos de la fase 2). Implementada en el paso 2; la estética llega en el paso 3.
+- **Estructura:** `index.html` semántico con módulos ES sin build (`js/app.js` como entrada; `i18n.js`, `api.js`, `arranque.js`, `combobox.js`, `formulario.js`, `resultado.js`, `formato.js`). Sin frameworks ni dependencias.
+- **Idiomas:** `i18n/es.json` e `i18n/en.json` con las mismas claves (comprobado por test). Los elementos con `data-i18n` reciben su texto; las etiquetas de campos, tipos, plantas, grupos y opciones salen del catálogo (bilingüe desde el dominio). Idioma inicial: el guardado en `localStorage` o, si no hay, el del navegador; cambia también `lang` del documento. Zonas y barrios no se traducen.
+- **Registro de arranque:** al cargar se llama a `/api/v1/health` sin esperar al formulario. Si no responde en 2,5 s, el registro avisa de que la instancia despierta y añade una línea cada 15 s; reintenta cada 3 s hasta 150 s. Los envíos hechos antes de que la API esté lista esperan en cola y el registro lo indica. La barra de estado muestra `api`, `modelo` (versión del informe) e `idioma`.
+- **Formulario:** distrito y barrio son desplegables con búsqueda (patrón combobox de ARIA, filtro sin tildes ni mayúsculas, flechas, Intro y Escape); el barrio solo ofrece los del distrito elegido. Habitaciones y baños tienen "no lo sé" (se envían `null`). "Más opciones" es un `details` cerrado con las 31 casillas en dos `fieldset`.
+- **Validación en el cliente:** mismas reglas y mismos códigos que la API (`FIELD_REQUIRED`, `INVALID_TYPE`, `OUT_OF_RANGE` con los rangos del catálogo, `BATHROOMS_ZERO`). Los errores de la API llegan con sus códigos estables y se muestran junto a su campo con el prefijo `ERROR:`; los que no tienen campo, en un resumen. Dos códigos son solo de la web: `RED` y `DESCONOCIDO`.
+- **Resultado:** precio redondeado a miles con formato por idioma (`1.102.000 €` / `€1,102,000`), margen y horquilla tal como los devuelve la API, anunciado con `aria-live`.
+- **Verificado en Chrome (local):** desplegable encadenado, caso chalet, "más opciones", errores de validación, predicción completa, cambio de idioma y registro de arranque sin API (sirviendo solo los estáticos).
+
+## D-036. Caché de los archivos de la web
+
+- **Estado:** aprobada como corrección técnica del paso 2.
+- **Problema detectado:** al regenerar `informe_modelo.json` y cambiar `app.js`, el navegador siguió usando las versiones anteriores de su caché, incluso al recargar. En producción, cada despliegue podría servir JavaScript y datos atrasados.
+- **Qué:** la app sirve todos los archivos de la web con `Cache-Control: no-cache`: el navegador puede guardarlos, pero los revalida con el servidor (ETag) en cada carga y solo los vuelve a descargar si han cambiado. Las respuestas de la API no llevan esa cabecera.
+- **Pendiente (paso 4):** la misma cabecera en el Static Site de Render (regla `/*` en `render.yaml` y en el panel).
+- **Alternativas descartadas:** `fetch(..., { cache: "no-cache" })` en el JavaScript (no cubre los propios módulos JS ni el CSS); nombres de archivo con huella (`app.3f2a.js`), que exigirían un paso de build.
 
 ---
 
 ## Pendiente de confirmar
 
-- Fase 2: comprobar en el primer despliegue del Static Site que `API_BASE_URL` está disponible en el comando de build (D-028).
+- `ALLOWED_ORIGINS` en el Web Service de Render (`https://ml-vivienda-madrid-1.onrender.com`) para que el Static Site pueda llamar a la API (D-028).
+- Cabecera `Cache-Control: no-cache` en el Static Site (D-036, paso 4).

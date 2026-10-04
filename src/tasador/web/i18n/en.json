@@ -1,0 +1,100 @@
+{
+  "marca": "tasador-madrid",
+  "idioma": {
+    "codigo": "EN",
+    "boton": "ES",
+    "ayuda": "switch to Spanish"
+  },
+  "arranque": {
+    "titulo": "boot log",
+    "conectando": "> connecting to the api...",
+    "reposo": "> instance asleep, waking up (may take ~1 min)",
+    "sigue": "> still waking up... {segundos} s",
+    "listo": "> model loaded. ready.",
+    "sin_conexion": "> no response from the api. will retry on submit.",
+    "en_cola": "> request queued: waiting for the api...",
+    "calculando": "> estimating...",
+    "recibido": "> estimate received.",
+    "rechazado": "> the api rejected the request. check the marked fields."
+  },
+  "estado": {
+    "api": "api",
+    "conectando": "connecting",
+    "despertando": "waking up",
+    "online": "online",
+    "offline": "offline",
+    "modelo": "model",
+    "idioma": "language"
+  },
+  "formulario": {
+    "titulo": "$ estimate --home",
+    "elegir": "-- choose --",
+    "no_indicado": "-- don't know --",
+    "buscar": "type to search",
+    "elige_distrito": "choose a district first",
+    "sin_coincidencias": "no matches",
+    "no_lo_se": "don't know",
+    "rango": "from {min} to {max}",
+    "no_aplica": "floor, lift and exterior/interior do not apply to houses.",
+    "mas_opciones": "more options",
+    "calcular": "[ ESTIMATE ]",
+    "calculando": "[ ESTIMATING... ]",
+    "hay_errores": "ERROR: check the marked fields."
+  },
+  "resultado": {
+    "titulo": "result",
+    "vacio": "fill in the form and press estimate.",
+    "precio": "estimated price",
+    "margen": "model error margin: ±{margen}",
+    "horquilla": "range: {minimo} - {maximo}",
+    "aviso": "indicative estimate based on Idealista Madrid listings from 2025. not an official valuation."
+  },
+  "graficos": {
+    "a": {
+      "titulo": "relative error by price band",
+      "lectura": "each bar is a quintile of actual price in the test set: band MAE / band median price. the marked band is the one your estimate falls in."
+    },
+    "b": {
+      "titulo": "actual vs predicted price (test, log scale)",
+      "lectura": "each dot is a test home. on the diagonal, a perfect prediction. the horizontal line is your estimate."
+    },
+    "c": {
+      "titulo": "feature importance",
+      "lectura": "share of use of each feature in the final model. top 10, the rest grouped.",
+      "otras": "other features..."
+    },
+    "d": {
+      "titulo": "MAE by model",
+      "lectura": "mean absolute error at each modelling step, cross-validated; the last point, on the test set."
+    }
+  },
+  "modelo": {
+    "titulo": "about the model",
+    "que_es": "a 2,044-tree CatBoostRegressor trained on Madrid homes for sale listed on Idealista in 2025. it estimates the price from floor area, district, neighbourhood, type, floor and listing features.",
+    "metricas": "on {viviendas} test homes: MAE {mae} · RMSE {rmse} · R² {r2}.",
+    "limitaciones": "limitations: it estimates the asking price, not the final sale price; Madrid city only; 2025 data; the error grows above €1.49M.",
+    "autoria": "model by Ramiro Caruso and Ana Manzanares, with exploratory analysis by Ana. this service, by Ramiro Caruso."
+  },
+  "pie": {
+    "repositorio": "repository",
+    "portfolio": "portfolio"
+  },
+  "errores": {
+    "INVALID_JSON": "malformed request.",
+    "FIELD_REQUIRED": "required field.",
+    "UNKNOWN_FIELD": "unknown field.",
+    "INVALID_TYPE": "must be a whole number.",
+    "INVALID_VALUE": "invalid value.",
+    "OUT_OF_RANGE": "must be between {min} and {max}.",
+    "BATHROOMS_ZERO": "bathrooms cannot be 0. if unknown, tick \"don't know\".",
+    "VALUE_NOT_IN_CATALOG": "value not available. pick one from the list.",
+    "BARRIO_NOT_IN_ZONE": "that neighbourhood is not in the chosen district.",
+    "UNKNOWN_OPTION": "unknown option.",
+    "NOT_FOUND": "resource not found.",
+    "METHOD_NOT_ALLOWED": "method not allowed.",
+    "MODEL_NOT_LOADED": "the model is not loaded yet. try again in a few seconds.",
+    "INTERNAL_ERROR": "api internal error.",
+    "RED": "could not reach the api.",
+    "DESCONOCIDO": "unexpected error."
+  }
+}

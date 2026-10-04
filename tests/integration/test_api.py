@@ -24,11 +24,11 @@ def codigos(respuesta) -> list[tuple[str, str | None]]:
     return resultado
 
 
-# GET /
+# GET /api/v1/ (antes en "/", que ahora sirve la web)
 
 
-def test_raiz(cliente):
-    respuesta = cliente.get("/")
+def test_informacion_del_servicio(cliente):
+    respuesta = cliente.get("/api/v1/")
     assert respuesta.status_code == 200
     cuerpo = respuesta.json()
     assert cuerpo["version"] == VERSION_APP
@@ -273,7 +273,8 @@ def test_head_de_health_sin_modelo_devuelve_503():
 
 def test_head_no_aparece_en_la_documentacion(cliente):
     esquema = cliente.get("/openapi.json").json()
-    assert set(esquema["paths"]["/"]) == {"get"}
+    assert set(esquema["paths"]["/api/v1/"]) == {"get"}
+    assert "/" not in esquema["paths"]
     assert set(esquema["paths"]["/api/v1/health"]) == {"get"}
 
 

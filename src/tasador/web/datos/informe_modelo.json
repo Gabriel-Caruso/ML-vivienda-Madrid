@@ -11,7 +11,7 @@
   "metricas_test": {
     "mae": 180709.77,
     "rmse": 439764.62,
-    "r2": 0.8635
+    "r2": 0.863476
   },
   "error_por_tramo": [
     {

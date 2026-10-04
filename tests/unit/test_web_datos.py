@@ -47,11 +47,12 @@ def test_informe_tiene_las_secciones_que_espera_la_web():
 
 
 def test_metricas_son_las_documentadas():
-    assert leer("informe_modelo.json")["metricas_test"] == {
-        "mae": 180_709.77,
-        "rmse": 439_764.62,
-        "r2": 0.8635,
-    }
+    metricas = leer("informe_modelo.json")["metricas_test"]
+    assert metricas["mae"] == 180_709.77
+    assert metricas["rmse"] == 439_764.62
+    assert round(metricas["r2"], 4) == 0.8635
+    # Con tres decimales, como en el README (sin doble redondeo: 0,8635 daría 0,864)
+    assert round(metricas["r2"], 3) == 0.863
 
 
 def test_datos_del_modelo():

@@ -427,63 +427,72 @@
       "label": {
         "es": "Ático",
         "en": "Penthouse"
-      }
+      },
+      "is_house": false
     },
     {
       "value": "Casa o chalet independiente",
       "label": {
         "es": "Casa o chalet independiente",
         "en": "Detached house"
-      }
+      },
+      "is_house": true
     },
     {
       "value": "Casa rural",
       "label": {
         "es": "Casa rural",
         "en": "Country house"
-      }
+      },
+      "is_house": true
     },
     {
       "value": "Chalet",
       "label": {
         "es": "Chalet",
         "en": "Chalet"
-      }
+      },
+      "is_house": true
     },
     {
       "value": "Chalet adosado",
       "label": {
         "es": "Chalet adosado",
         "en": "Terraced house"
-      }
+      },
+      "is_house": true
     },
     {
       "value": "Chalet pareado",
       "label": {
         "es": "Chalet pareado",
         "en": "Semi-detached house"
-      }
+      },
+      "is_house": true
     },
     {
       "value": "Dúplex",
       "label": {
         "es": "Dúplex",
         "en": "Duplex"
-      }
+      },
+      "is_house": false
     },
     {
       "value": "Estudio",
       "label": {
         "es": "Estudio",
         "en": "Studio"
-      }
+      },
+      "is_house": false
     },
     {
       "value": "Piso",
       "label": {
         "es": "Piso",
         "en": "Flat"
-      }
+      },
+      "is_house": false
     }
   ],
   "lift": [

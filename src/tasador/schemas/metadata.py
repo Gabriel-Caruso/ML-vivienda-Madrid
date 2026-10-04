@@ -43,6 +43,16 @@ class Campo(BaseModel):
     range: RangoNumerico | None
 
 
+class TipoInmueble(BaseModel):
+    """Tipo de inmueble; is_house indica casa o chalet (sin planta, ascensor ni localización)."""
+
+    model_config = ConfigDict(title="PropertyType")
+
+    value: str
+    label: EtiquetaBilingue
+    is_house: bool
+
+
 class OpcionBinaria(BaseModel):
     model_config = ConfigDict(title="BinaryOption")
 
@@ -65,7 +75,7 @@ class RespuestaMetadata(BaseModel):
 
     fields: list[Campo]
     districts: list[Distrito]
-    property_types: list[Opcion]
+    property_types: list[TipoInmueble]
     lift: list[Opcion]
     position: list[Opcion]
     floors: list[Opcion]

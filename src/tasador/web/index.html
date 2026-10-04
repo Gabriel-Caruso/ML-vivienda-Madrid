@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tasador-madrid</title>
+  <meta name="description" content="Estimación orientativa del precio de venta de una vivienda en Madrid con un modelo CatBoost entrenado con anuncios de Idealista de 2025.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="tasador-madrid">
+  <meta property="og:description" content="Estimación orientativa del precio de venta de una vivienda en Madrid con un modelo CatBoost.">
+  <link rel="stylesheet" href="css/estilo.css">
+  <script src="config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="cabecera">
+    <p class="marca" data-i18n="marca">tasador-madrid</p>
+    <button type="button" id="boton-idioma" class="boton-idioma" aria-describedby="idioma-ayuda">EN</button>
+    <span id="idioma-ayuda" class="solo-lectores" data-i18n="idioma.ayuda">cambiar idioma</span>
+  </header>
+
+  <main>
+    <section class="arranque" aria-labelledby="titulo-arranque">
+      <h1 id="titulo-arranque" class="solo-lectores" data-i18n="arranque.titulo">registro de arranque</h1>
+      <ol id="registro" class="registro" role="log" aria-live="polite"></ol>
+    </section>
+
+    <div class="trabajo">
+      <section class="tasacion" aria-labelledby="titulo-formulario">
+        <h2 id="titulo-formulario" data-i18n="formulario.titulo">$ tasar --vivienda</h2>
+        <form id="formulario" novalidate>
+          <div id="errores-formulario" class="errores-formulario" role="alert" hidden></div>
+
+          <div class="campo" data-campo="district">
+            <label for="campo-district" data-etiqueta-campo="district">distrito</label>
+            <div class="combobox" id="combobox-district"></div>
+            <p class="error-campo" id="error-district" hidden></p>
+          </div>
+
+          <div class="campo" data-campo="neighbourhood">
+            <label for="campo-neighbourhood" data-etiqueta-campo="neighbourhood">barrio</label>
+            <div class="combobox" id="combobox-neighbourhood"></div>
+            <p class="error-campo" id="error-neighbourhood" hidden></p>
+          </div>
+
+          <div class="campo" data-campo="property_type">
+            <label for="campo-property_type" data-etiqueta-campo="property_type">tipo</label>
+            <select id="campo-property_type" name="property_type" required aria-describedby="error-property_type"></select>
+            <p class="error-campo" id="error-property_type" hidden></p>
+          </div>
+
+          <div class="campo" data-campo="area_m2">
+            <label for="campo-area_m2" data-etiqueta-campo="area_m2">metros</label>
+            <input id="campo-area_m2" name="area_m2" type="number" inputmode="numeric" step="1" required aria-describedby="rango-area_m2 error-area_m2">
+            <p class="rango-campo" id="rango-area_m2"></p>
+            <p class="error-campo" id="error-area_m2" hidden></p>
+          </div>
+
+          <div class="campo" data-campo="rooms">
+            <label for="campo-rooms" data-etiqueta-campo="rooms">habitaciones</label>
+            <input id="campo-rooms" name="rooms" type="number" inputmode="numeric" step="1" aria-describedby="rango-rooms error-rooms">
+            <label class="no-lo-se"><input type="checkbox" id="no-sabe-rooms"> <span data-i18n="formulario.no_lo_se">no lo sé</span></label>
+            <p class="rango-campo" id="rango-rooms"></p>
+            <p class="error-campo" id="error-rooms" hidden></p>
+          </div>
+
+          <div class="campo" data-campo="bathrooms">
+            <label for="campo-bathrooms" data-etiqueta-campo="bathrooms">baños</label>
+            <input id="campo-bathrooms" name="bathrooms" type="number" inputmode="numeric" step="1" aria-describedby="rango-bathrooms error-bathrooms">
+            <label class="no-lo-se"><input type="checkbox" id="no-sabe-bathrooms"> <span data-i18n="formulario.no_lo_se">no lo sé</span></label>
+            <p class="rango-campo" id="rango-bathrooms"></p>
+            <p class="error-campo" id="error-bathrooms" hidden></p>
+          </div>
+
+          <div id="campos-edificio">
+            <div class="campo" data-campo="floor">
+              <label for="campo-floor" data-etiqueta-campo="floor">planta</label>
+              <select id="campo-floor" name="floor" aria-describedby="error-floor"></select>
+              <p class="error-campo" id="error-floor" hidden></p>
+            </div>
+
+            <div class="campo" data-campo="lift">
+              <label for="campo-lift" data-etiqueta-campo="lift">ascensor</label>
+              <select id="campo-lift" name="lift" aria-describedby="error-lift"></select>
+              <p class="error-campo" id="error-lift" hidden></p>
+            </div>
+
+            <div class="campo" data-campo="position">
+              <label for="campo-position" data-etiqueta-campo="position">localización</label>
+              <select id="campo-position" name="position" aria-describedby="error-position"></select>
+              <p class="error-campo" id="error-position" hidden></p>
+            </div>
+          </div>
+          <p id="aviso-casa" class="aviso-casa" data-i18n="formulario.no_aplica" hidden>planta, ascensor y localización no aplican en casas y chalets</p>
+
+          <details class="mas-opciones" id="mas-opciones">
+            <summary data-i18n="formulario.mas_opciones">más opciones</summary>
+            <div id="grupos-opciones"></div>
+            <p class="error-campo" id="error-options" hidden></p>
+          </details>
+
+          <button type="submit" id="boton-calcular" class="boton-comando" data-i18n="formulario.calcular">[ CALCULAR ]</button>
+        </form>
+      </section>
+
+      <section class="resultado" aria-labelledby="titulo-resultado">
+        <h2 id="titulo-resultado" data-i18n="resultado.titulo">resultado</h2>
+        <div id="resultado" aria-live="polite" aria-atomic="true">
+          <p class="resultado-vacio" data-i18n="resultado.vacio">rellena el formulario y pulsa calcular.</p>
+        </div>
+        <p class="aviso" data-i18n="resultado.aviso">estimación orientativa a partir de anuncios de Idealista Madrid de 2025. no es una tasación oficial.</p>
+        <figure class="grafico" id="grafico-a" aria-labelledby="titulo-grafico-a">
+          <figcaption>
+            <span id="titulo-grafico-a" class="titulo-grafico" data-i18n="graficos.a.titulo">error relativo por tramo de precio</span>
+            <span class="lectura-grafico" data-i18n="graficos.a.lectura">cada barra es un quintil de precio real en test.</span>
+          </figcaption>
+          <div class="lienzo-grafico" id="lienzo-grafico-a"></div>
+        </figure>
+        <figure class="grafico" id="grafico-b" aria-labelledby="titulo-grafico-b">
+          <figcaption>
+            <span id="titulo-grafico-b" class="titulo-grafico" data-i18n="graficos.b.titulo">precio real frente a predicho</span>
+            <span class="lectura-grafico" data-i18n="graficos.b.lectura">cada punto es una vivienda de test.</span>
+          </figcaption>
+          <div class="lienzo-grafico" id="lienzo-grafico-b"></div>
+        </figure>
+      </section>
+    </div>
+
+    <section class="sobre-modelo" aria-labelledby="titulo-modelo">
+      <h2 id="titulo-modelo" data-i18n="modelo.titulo">sobre el modelo</h2>
+      <p id="texto-modelo" data-i18n="modelo.que_es">un CatBoostRegressor que estima el precio de venta.</p>
+      <p id="metricas-modelo"></p>
+      <p data-i18n="modelo.limitaciones">limitaciones</p>
+      <p data-i18n="modelo.autoria">autoría</p>
+      <figure class="grafico" id="grafico-c" aria-labelledby="titulo-grafico-c">
+        <figcaption>
+          <span id="titulo-grafico-c" class="titulo-grafico" data-i18n="graficos.c.titulo">importancia de variables</span>
+          <span class="lectura-grafico" data-i18n="graficos.c.lectura">cuánto usa el modelo cada variable.</span>
+        </figcaption>
+        <div class="lienzo-grafico" id="lienzo-grafico-c"></div>
+      </figure>
+      <figure class="grafico" id="grafico-d" aria-labelledby="titulo-grafico-d">
+        <figcaption>
+          <span id="titulo-grafico-d" class="titulo-grafico" data-i18n="graficos.d.titulo">MAE por modelo</span>
+          <span class="lectura-grafico" data-i18n="graficos.d.lectura">de la regresión lineal al modelo final.</span>
+        </figcaption>
+        <div class="lienzo-grafico" id="lienzo-grafico-d"></div>
+      </figure>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <ul class="enlaces">
+      <li><a href="https://github.com/Gabriel-Caruso" rel="noopener">github</a></li>
+      <li><a href="https://www.linkedin.com/in/ramiro-caruso-964899125" rel="noopener">linkedin</a></li>
+      <li><a href="https://www.instagram.com/gabriel_caruso/" rel="noopener">instagram</a></li>
+      <li><a href="https://github.com/Gabriel-Caruso/ML-vivienda-Madrid" rel="noopener" data-i18n="pie.repositorio">repositorio</a></li>
+      <li id="enlace-portfolio" hidden><a href="#" rel="noopener" data-i18n="pie.portfolio">portfolio</a></li>
+    </ul>
+  </footer>
+
+  <div class="barra-estado" role="status">
+    <span><span data-i18n="estado.api">api</span>: <span id="estado-api" data-i18n="estado.conectando">conectando</span></span>
+    <span class="separador" aria-hidden="true">|</span>
+    <span><span data-i18n="estado.modelo">modelo</span>: <span id="estado-modelo">catboost</span></span>
+    <span class="separador" aria-hidden="true">|</span>
+    <span><span data-i18n="estado.idioma">idioma</span>: <span id="estado-idioma">ES</span></span>
+  </div>
+</body>
+</html>

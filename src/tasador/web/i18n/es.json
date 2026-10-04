@@ -1,0 +1,100 @@
+{
+  "marca": "tasador-madrid",
+  "idioma": {
+    "codigo": "ES",
+    "boton": "EN",
+    "ayuda": "cambiar a inglés"
+  },
+  "arranque": {
+    "titulo": "registro de arranque",
+    "conectando": "> conectando con la api...",
+    "reposo": "> instancia en reposo, despertando (puede tardar ~1 min)",
+    "sigue": "> sigue despertando... {segundos} s",
+    "listo": "> modelo cargado. listo.",
+    "sin_conexion": "> sin respuesta de la api. se reintentará al calcular.",
+    "en_cola": "> petición en cola: esperando a la api...",
+    "calculando": "> calculando...",
+    "recibido": "> estimación recibida.",
+    "rechazado": "> la api ha rechazado la petición. revisa los campos marcados."
+  },
+  "estado": {
+    "api": "api",
+    "conectando": "conectando",
+    "despertando": "despertando",
+    "online": "online",
+    "offline": "sin conexión",
+    "modelo": "modelo",
+    "idioma": "idioma"
+  },
+  "formulario": {
+    "titulo": "$ tasar --vivienda",
+    "elegir": "-- elegir --",
+    "no_indicado": "-- no lo sé --",
+    "buscar": "escribe para buscar",
+    "elige_distrito": "elige antes un distrito",
+    "sin_coincidencias": "sin coincidencias",
+    "no_lo_se": "no lo sé",
+    "rango": "de {min} a {max}",
+    "no_aplica": "planta, ascensor y localización no aplican en casas y chalets.",
+    "mas_opciones": "más opciones",
+    "calcular": "[ CALCULAR ]",
+    "calculando": "[ CALCULANDO... ]",
+    "hay_errores": "ERROR: revisa los campos marcados."
+  },
+  "resultado": {
+    "titulo": "resultado",
+    "vacio": "rellena el formulario y pulsa calcular.",
+    "precio": "precio estimado",
+    "margen": "margen de error del modelo: ±{margen}",
+    "horquilla": "horquilla: {minimo} - {maximo}",
+    "aviso": "estimación orientativa a partir de anuncios de Idealista Madrid de 2025. no es una tasación oficial."
+  },
+  "graficos": {
+    "a": {
+      "titulo": "error relativo por tramo de precio",
+      "lectura": "cada barra es un quintil de precio real en test: MAE del tramo / precio mediano del tramo. el tramo marcado es el de tu estimación."
+    },
+    "b": {
+      "titulo": "precio real frente a predicho (test, escala logarítmica)",
+      "lectura": "cada punto es una vivienda de test. sobre la diagonal, predicción perfecta. la línea horizontal es tu estimación."
+    },
+    "c": {
+      "titulo": "importancia de variables",
+      "lectura": "porcentaje de uso de cada variable en el modelo final. las 10 primeras y el resto agrupado.",
+      "otras": "otras variables..."
+    },
+    "d": {
+      "titulo": "MAE por modelo",
+      "lectura": "error absoluto medio de cada paso del modelado, en validación cruzada; el último punto, sobre test."
+    }
+  },
+  "modelo": {
+    "titulo": "sobre el modelo",
+    "que_es": "un CatBoostRegressor de 2.044 árboles entrenado con anuncios de viviendas en venta en Madrid publicados en Idealista en 2025. estima el precio a partir de superficie, distrito, barrio, tipo, planta y características del anuncio.",
+    "metricas": "sobre {viviendas} viviendas de test: MAE {mae} · RMSE {rmse} · R² {r2}.",
+    "limitaciones": "limitaciones: estima el precio de anuncio, no el de venta final; solo Madrid capital; datos de 2025; el error crece por encima de 1,49 M€.",
+    "autoria": "modelo de Ramiro Caruso y Ana Manzanares, con el análisis exploratorio de Ana. este servicio, de Ramiro Caruso."
+  },
+  "pie": {
+    "repositorio": "repositorio",
+    "portfolio": "portfolio"
+  },
+  "errores": {
+    "INVALID_JSON": "petición mal formada.",
+    "FIELD_REQUIRED": "campo obligatorio.",
+    "UNKNOWN_FIELD": "campo desconocido.",
+    "INVALID_TYPE": "debe ser un número entero.",
+    "INVALID_VALUE": "valor no válido.",
+    "OUT_OF_RANGE": "debe estar entre {min} y {max}.",
+    "BATHROOMS_ZERO": "los baños no pueden ser 0. si no lo sabes, marca \"no lo sé\".",
+    "VALUE_NOT_IN_CATALOG": "valor no disponible. elige uno de la lista.",
+    "BARRIO_NOT_IN_ZONE": "ese barrio no pertenece al distrito elegido.",
+    "UNKNOWN_OPTION": "opción desconocida.",
+    "NOT_FOUND": "recurso no encontrado.",
+    "METHOD_NOT_ALLOWED": "método no permitido.",
+    "MODEL_NOT_LOADED": "el modelo aún no está cargado. inténtalo en unos segundos.",
+    "INTERNAL_ERROR": "error interno de la api.",
+    "RED": "no se pudo contactar con la api.",
+    "DESCONOCIDO": "error inesperado."
+  }
+}
