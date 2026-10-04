@@ -10,7 +10,7 @@ Es una API REST hecha con FastAPI que sirve un modelo CatBoost ya entrenado. La 
 
 El modelo es el resultado del proyecto final de Machine Learning del bootcamp, en el repositorio [Gabriel-Caruso/ML-idealista](https://github.com/Gabriel-Caruso/ML-idealista):
 
-- **Datos:** [dataset de Kaggle](https://www.kaggle.com/datasets/fjcob1/idealista-madrid) con anuncios de viviendas en venta en Madrid publicados en Idealista.
+- **Datos:** [dataset de Kaggle](https://www.kaggle.com/datasets/fjcob1/idealista-madrid) con anuncios de viviendas en venta en Madrid publicados en Idealista en 2025.
 - **Análisis exploratorio (EDA):** Ana Manzanares.
 - **Preprocesado, modelado y optimización:** Ramiro Caruso.
 - **Modelo:** `CatBoostRegressor` optimizado con Optuna y entrenado sobre el logaritmo del precio (`TransformedTargetRegressor` con `log1p`/`expm1`). Usa 69 variables: superficie, baños, habitaciones, distrito, barrio, tipo de inmueble, ascensor, exterior/interior, planta y 60 indicadores binarios extraídos del anuncio.
@@ -201,7 +201,7 @@ Un test de referencia comprueba que, para 20 viviendas reales, la API reproduce 
 
 ## Limitaciones
 
-- **Fecha de los datos:** el modelo se entrenó con anuncios publicados en una fecha concreta. No recoge la evolución posterior del mercado.
+- **Fecha de los datos:** el modelo se entrenó con anuncios de 2025. No recoge la evolución posterior del mercado.
 - **Precio de anuncio:** estima el precio que se pide en un anuncio, no el precio final de venta ni el valor de tasación.
 - **Cobertura:** solo Madrid capital (21 distritos y 139 barrios, según la división de Idealista).
 - **Error variable:** el error crece en las viviendas de más de 1.490.000 € (24 %). La horquilla lo refleja.

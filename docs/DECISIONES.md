@@ -286,10 +286,10 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada.
 - **Qué:** en español. Incluye qué es, el origen del modelo, las métricas en test indicadas por el responsable (MAE 180.710 €, RMSE 439.765 €, R² 0,863), la tabla de tramos, cómo ejecutarlo en local con uv, los endpoints con ejemplos reales, la tabla de códigos de error, el despliegue y el arranque en frío de Render (15 minutos sin tráfico, alrededor de un minuto para despertar), las limitaciones y la autoría (Ramiro Caruso y Ana Manzanares, con el EDA acreditado a Ana).
-- **Limitación sin concretar:** la fecha de los datos. El dataset de Kaggle no la indica en lo consultado, así que el README dice "una fecha concreta" sin inventarla.
+- **Fecha de los datos:** anuncios de Idealista Madrid de 2025, confirmado por el responsable del proyecto. El README lo indica en el origen del modelo y en las limitaciones.
 
 ---
 
 ## Pendiente de confirmar
 
-- Fecha de los datos para el README, si se quiere concretar (D-027).
+- Nada pendiente al cierre de la fase 1.
