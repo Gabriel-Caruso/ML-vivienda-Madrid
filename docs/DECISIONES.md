@@ -29,7 +29,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Estado:** aprobada.
 - **Qué:** `catboost==1.2.10`, `scikit-learn==1.9.0`, `pandas==3.0.3`, `numpy==2.5.1`, `joblib==1.5.3` (las del `requirements.txt` del entrenamiento). FastAPI, Pydantic y Uvicorn con `>=` y versión exacta fijada por `uv.lock`.
 - **Por qué:** el modelo está serializado con esas versiones; cambiarlas puede romper la carga o alterar predicciones. La capa web no afecta al modelo y conviene poder actualizarla con `uv lock --upgrade-package`.
-- **Dependencias indirectas:** las que también estaban en el entorno de entrenamiento se fijan a su versión con `[tool.uv] constraint-dependencies`: contourpy 1.3.3, fonttools 4.63.0, kiwisolver 1.5.0, matplotlib 3.11.0, narwhals 2.23.0, packaging 26.2, plotly 6.9.0, pyparsing 3.3.2, scipy 1.18.0, threadpoolctl 3.6.0, tzdata 2026.2. Una restricción solo limita la versión y no instala nada por sí misma. Con ellas fijadas pasan todos los tests y `scripts/verify_model.py` carga y predice sin avisos. `tests/unit/test_entorno.py` comprueba que la versión de Python y la de cada paquete fijado son las del entrenamiento.
+- **Dependencias indirectas:** las que también estaban en el entorno de entrenamiento se fijan a su versión con `[tool.uv] constraint-dependencies`: contourpy 1.3.3, fonttools 4.63.0, kiwisolver 1.5.0, matplotlib 3.11.0, narwhals 2.23.0, packaging 26.2, plotly 6.9.0, pyparsing 3.3.2, scipy 1.18.0, threadpoolctl 3.6.0, tzdata 2026.2. `tzdata` solo se instala en Windows (pandas lo pide con el marcador `sys_platform == 'win32'`), así que su test se salta en Linux; no comprobarlo así hizo fallar la primera ejecución de la CI. Una restricción solo limita la versión y no instala nada por sí misma. Con ellas fijadas pasan todos los tests y `scripts/verify_model.py` carga y predice sin avisos. `tests/unit/test_entorno.py` comprueba que la versión de Python y la de cada paquete fijado son las del entrenamiento.
 - **Alternativas descartadas:** dejar las indirectas libres (primera versión de esta decisión): no forman parte del objeto serializado, pero fijarlas elimina una fuente de diferencias sin coste. Declararlas como dependencias directas: daría a entender que el código las usa.
 - **Pydantic** se declara explícitamente aunque llegue con FastAPI, porque el código lo importa directamente.
 
@@ -206,7 +206,8 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada (los códigos estables vienen del contrato de `CLAUDE.md`).
 - **Qué:** `schemas/prediccion.py` valida con Pydantic en modo estricto (`strict=True`: `"85"` o `85.5` no se aceptan como entero, `true` tampoco) y rechaza campos desconocidos (`extra="forbid"`). Las reglas del problema (rangos, catálogo, barrio-zona, opciones) son validadores que consultan `domain/` y lanzan `PydanticCustomError` con el código como tipo. `api/errores.py` convierte todos los errores al formato `{"errors": [{"code", "field", "message", "params"}]}` con estado 422.
-- **Códigos:** `INVALID_JSON`, `FIELD_REQUIRED`, `UNKNOWN_FIELD`, `INVALID_TYPE`, `INVALID_VALUE` (genérico), `OUT_OF_RANGE` (con `min` y `max`), `BATHROOMS_ZERO`, `VALUE_NOT_IN_CATALOG`, `BARRIO_NOT_IN_ZONE` (con barrio y zona), `UNKNOWN_OPTION`, `MODEL_NOT_LOADED` (503) e `INTERNAL_ERROR` (500).
+- **Códigos:** `INVALID_JSON`, `FIELD_REQUIRED`, `UNKNOWN_FIELD`, `INVALID_TYPE`, `INVALID_VALUE` (genérico), `OUT_OF_RANGE` (con `min` y `max`), `BATHROOMS_ZERO`, `VALUE_NOT_IN_CATALOG`, `BARRIO_NOT_IN_ZONE` (con barrio y zona), `UNKNOWN_OPTION`, `NOT_FOUND` (404), `METHOD_NOT_ALLOWED` (405, conserva la cabecera `Allow`), `MODEL_NOT_LOADED` (503) e `INTERNAL_ERROR` (500).
+- **Errores HTTP de Starlette:** un cuerpo ilegible (400, por ejemplo texto que no es UTF-8), una ruta inexistente (404) o un método no permitido (405) responderían por defecto `{"detail": ...}`. Un manejador propio los devuelve con el mismo formato y los códigos `INVALID_JSON`, `NOT_FOUND` y `METHOD_NOT_ALLOWED`. Detectado al probar el despliegue en Render; aprobado por el responsable del proyecto.
 - **Orden de comprobación:** `bathrooms = 0` da `BATHROOMS_ZERO`, no `OUT_OF_RANGE`. `BARRIO_NOT_IN_ZONE` solo se evalúa si zona y barrio existen por separado; si la zona no existe, el error es `VALUE_NOT_IN_CATALOG`. Se devuelven todos los errores a la vez, no solo el primero.
 - **`DESCONOCIDO` y `NO_APLICA`** no se aceptan como entrada: el usuario envía null y la API los asigna (D-014).
 - **Opciones como lista de claves** (`"options": ["terrace", "renovated"]`) en lugar de 31 campos booleanos: el esquema no duplica la lista del dominio, y Swagger muestra las claves válidas como `enum`. Una clave repetida no cambia el resultado.
@@ -236,6 +237,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 - **Estado:** aprobada.
 - **Qué:** `create_app()` es una fábrica (`uvicorn --factory tasador.main:create_app`); el modelo se carga una sola vez en el `lifespan` y se guarda en `app.state`. Si el archivo no existe, la app no arranca. `/api/v1/health` devuelve 200 con `model_loaded: true`, o 503 si el modelo no está cargado. `GET /` devuelve nombre, versión (de `pyproject.toml`) y enlaces.
+- **HEAD:** `/` y `/api/v1/health` aceptan también `HEAD`. Render comprueba el puerto con `HEAD /` y muchos monitores de disponibilidad usan HEAD; antes respondían 405. Se registra como ruta aparte, fuera del esquema OpenAPI, porque declarar GET y HEAD en la misma ruta genera un identificador de operación duplicado en `/docs`.
 - **Logs:** el logger `tasador` usa el formato de uvicorn y registra solo eventos técnicos (carga del modelo con su ruta y número de columnas, errores internos). Un test comprueba que los datos de una petición no aparecen en los logs.
 - **Alternativa descartada:** variable global `app` a nivel de módulo: cargaría el modelo al importar y complicaría los tests.
 
@@ -267,10 +269,14 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
   - Fráncfort es la región disponible más cercana a Madrid.
   - `checksPass` solo despliega si la CI pasa.
 - **Ensayado en local:** con un entorno aparte, `uv sync --locked --no-dev` no instala pytest ni ruff, y el comando de arranque levanta la app, carga el modelo y responde en health y predict.
-- **Pendiente de verificar en el primer despliegue:**
-  - que Render ofrece Python 3.14.4 exacto (la documentación solo garantiza 3.7.3 y posteriores, con 3.14.3 por defecto);
-  - que `uv` está en el PATH en tiempo de ejecución (la documentación indica que se puede usar "en el build y otros scripts");
-  - la RAM disponible del plan gratuito (D-009).
+- **Servicio creado con el formulario del panel**, no con el blueprint: `render.yaml` queda como referencia versionada de la configuración, que se introdujo a mano con los mismos valores.
+- **Verificado en el primer despliegue (commit `ff69cbe`):**
+  - Render instaló Python 3.14.4 desde `.python-version` y uv 0.12.23 desde `UV_VERSION`;
+  - el build sin dependencias de desarrollo instaló 35 paquetes con las versiones de `uv.lock`;
+  - `uv run --no-sync` funciona en tiempo de ejecución y el modelo carga (69 columnas);
+  - contra la URL pública: health, raíz, metadata, `/docs`, predicción y los errores `BARRIO_NOT_IN_ZONE` y `BATHROOMS_ZERO` responden como en local, y el precio exacto en Linux es idéntico al de Windows;
+  - `checksPass` funciona: el commit `8b897aa` no se desplegó porque la CI falló (ver D-002, `tzdata`).
+- **Pendiente:** el campo Health Check Path estaba vacío en el panel y hay que fijarlo a `/api/v1/health`; consultar la memoria en Metrics (D-009).
 - **Alternativas descartadas:** `pip install` con un `requirements.txt` exportado (duplicaría `uv.lock`); `autoDeployTrigger: commit` (podría desplegar un commit con tests rotos).
 - **Fuentes:** https://render.com/docs/blueprint-spec, https://render.com/docs/uv-version, https://render.com/docs/troubleshooting-python-deploys, https://render.com/docs/web-services, https://render.com/docs/health-checks, https://render.com/docs/free
 
@@ -284,5 +290,5 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 ## Pendiente de confirmar
 
-- Las tres verificaciones del primer despliegue en Render (D-026).
+- Health Check Path en el panel de Render y memoria en uso (D-026).
 - Fecha de los datos para el README, si se quiere concretar (D-027).

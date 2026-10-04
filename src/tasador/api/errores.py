@@ -1,9 +1,12 @@
 """Traducción de errores a respuestas con códigos estables.
 
-Los errores de validación de Pydantic se convierten a la forma
-{"errors": [{"code", "field", "message", "params"}]}. Los códigos propios
-(BARRIO_NOT_IN_ZONE...) ya vienen como tipo del error; los de Pydantic se
-agrupan en unos pocos códigos genéricos.
+Todas las respuestas de error tienen la forma
+{"errors": [{"code", "field", "message", "params"}]}:
+- errores de validación de Pydantic: los códigos propios (BARRIO_NOT_IN_ZONE...)
+  ya vienen como tipo del error; los de Pydantic se agrupan en códigos genéricos;
+- errores HTTP de Starlette (cuerpo ilegible, ruta inexistente, método no
+  permitido), que por defecto responderían {"detail": ...};
+- cualquier excepción no controlada, como INTERNAL_ERROR.
 """
 
 import logging
@@ -11,6 +14,7 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException
 
 from tasador.schemas.errores import CodigoError, DetalleError, RespuestaErrores
 
@@ -22,6 +26,14 @@ CODIGOS_PYDANTIC = {
     "missing": CodigoError.FIELD_REQUIRED,
     "extra_forbidden": CodigoError.UNKNOWN_FIELD,
     "json_invalid": CodigoError.INVALID_JSON,
+}
+
+# Código según el estado de un error HTTP de Starlette. El 400 solo lo lanza
+# FastAPI cuando no puede leer el cuerpo (por ejemplo, texto que no es UTF-8).
+CODIGOS_HTTP = {
+    status.HTTP_400_BAD_REQUEST: CodigoError.INVALID_JSON,
+    status.HTTP_404_NOT_FOUND: CodigoError.NOT_FOUND,
+    status.HTTP_405_METHOD_NOT_ALLOWED: CodigoError.METHOD_NOT_ALLOWED,
 }
 
 # Prefijo de la ruta de los errores del cuerpo de la petición
@@ -76,6 +88,19 @@ async def manejar_validacion(request: Request, exc: RequestValidationError) -> J
     )
 
 
+async def manejar_error_http(request: Request, exc: HTTPException) -> JSONResponse:
+    codigo = CODIGOS_HTTP.get(exc.status_code, CodigoError.INTERNAL_ERROR)
+    respuesta = RespuestaErrores(
+        errors=[DetalleError(code=codigo, field=None, message=str(exc.detail), params={})]
+    )
+    # Se conservan las cabeceras del error, como "Allow" en un 405
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=respuesta.model_dump(mode="json"),
+        headers=exc.headers,
+    )
+
+
 async def manejar_error_interno(request: Request, exc: Exception) -> JSONResponse:
     # Solo se registra el error técnico, nunca el contenido de la petición
     logger.exception("Error no controlado en %s %s", request.method, request.url.path)
@@ -96,4 +121,5 @@ async def manejar_error_interno(request: Request, exc: Exception) -> JSONRespons
 
 def registrar_manejadores(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, manejar_validacion)
+    app.add_exception_handler(HTTPException, manejar_error_http)
     app.add_exception_handler(Exception, manejar_error_interno)

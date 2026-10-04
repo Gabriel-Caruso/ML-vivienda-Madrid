@@ -29,8 +29,11 @@ VERSIONES_ENTRENAMIENTO = {
     "pyparsing": "3.3.2",
     "scipy": "1.18.0",
     "threadpoolctl": "3.6.0",
-    "tzdata": "2026.2",
 }
+
+# pandas solo depende de tzdata en Windows (marcador sys_platform == 'win32' en
+# uv.lock): en Linux (CI y Render) no se instala y no hay versión que comprobar.
+VERSION_TZDATA_ENTRENAMIENTO = "2026.2"
 
 
 def test_version_python_es_la_del_entrenamiento():
@@ -40,3 +43,8 @@ def test_version_python_es_la_del_entrenamiento():
 @pytest.mark.parametrize(("paquete", "version_esperada"), VERSIONES_ENTRENAMIENTO.items())
 def test_version_instalada_es_la_del_entrenamiento(paquete, version_esperada):
     assert version(paquete) == version_esperada
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="tzdata solo se instala en Windows")
+def test_version_tzdata_en_windows():
+    assert version("tzdata") == VERSION_TZDATA_ENTRENAMIENTO

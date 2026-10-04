@@ -231,9 +231,61 @@ def test_error_interno_devuelve_codigo_estable(monkeypatch):
     assert codigos(respuesta) == [("INTERNAL_ERROR", None)]
 
 
+# Errores HTTP fuera de la validación: mismo formato que el resto
+
+
+def test_cuerpo_no_utf8_devuelve_invalid_json(cliente):
+    cuerpo = '{"area_m2": 85, "floor": "3ª"}'.encode("latin-1")
+    respuesta = cliente.post(
+        URL_PREDICT, content=cuerpo, headers={"content-type": "application/json"}
+    )
+    assert respuesta.status_code == 400
+    assert codigos(respuesta) == [("INVALID_JSON", None)]
+
+
+def test_ruta_inexistente_devuelve_not_found(cliente):
+    respuesta = cliente.get("/api/v1/no-existe")
+    assert respuesta.status_code == 404
+    assert codigos(respuesta) == [("NOT_FOUND", None)]
+
+
+def test_metodo_no_permitido_conserva_cabecera_allow(cliente):
+    respuesta = cliente.delete("/api/v1/predict")
+    assert respuesta.status_code == 405
+    assert codigos(respuesta) == [("METHOD_NOT_ALLOWED", None)]
+    assert "POST" in respuesta.headers["allow"]
+
+
+# HEAD
+
+
+@pytest.mark.parametrize("ruta", ["/", "/api/v1/health"])
+def test_head_responde_200_sin_cuerpo(cliente, ruta):
+    respuesta = cliente.head(ruta)
+    assert respuesta.status_code == 200
+    assert respuesta.content == b""
+
+
+def test_head_de_health_sin_modelo_devuelve_503():
+    respuesta = TestClient(create_app()).head("/api/v1/health")
+    assert respuesta.status_code == 503
+
+
+def test_head_no_aparece_en_la_documentacion(cliente):
+    esquema = cliente.get("/openapi.json").json()
+    assert set(esquema["paths"]["/"]) == {"get"}
+    assert set(esquema["paths"]["/api/v1/health"]) == {"get"}
+
+
+def test_head_no_se_admite_en_predict(cliente):
+    assert cliente.head(URL_PREDICT).status_code == 405
+
+
 def test_todos_los_codigos_de_validacion_estan_cubiertos():
     # Recordatorio: si se añade un código nuevo, debe tener su test de integración
     cubiertos = {
+        "NOT_FOUND",
+        "METHOD_NOT_ALLOWED",
         "INVALID_JSON",
         "FIELD_REQUIRED",
         "UNKNOWN_FIELD",

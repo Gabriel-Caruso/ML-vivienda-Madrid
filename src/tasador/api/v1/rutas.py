@@ -55,6 +55,11 @@ def health(predictor: PredictorCargado):
     return RespuestaSalud(status="ok", model_loaded=True)
 
 
+# HEAD además de GET: Render y los monitores de disponibilidad comprueban con HEAD.
+# Se registra aparte y fuera del esquema para no duplicar la operación en /docs.
+router.add_api_route("/health", health, methods=["HEAD"], include_in_schema=False)
+
+
 @router.get(
     "/metadata",
     response_model=RespuestaMetadata,

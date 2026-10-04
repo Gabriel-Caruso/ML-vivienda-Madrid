@@ -72,7 +72,7 @@ uv run pytest
 {"status": "ok", "model_loaded": true}
 ```
 
-Devuelve 503 si el modelo no está cargado.
+Devuelve 503 si el modelo no está cargado. Admite también `HEAD`, como `/`, para monitores de disponibilidad.
 
 ### `GET /api/v1/metadata`
 
@@ -149,7 +149,7 @@ Los errores se devuelven con códigos estables, no con frases, para que la inter
 
 | Código | Estado | Significado |
 |---|---|---|
-| `INVALID_JSON` | 422 | El cuerpo no es JSON válido |
+| `INVALID_JSON` | 422 / 400 | El cuerpo no es JSON válido (400 si ni siquiera se puede leer, por ejemplo texto que no es UTF-8) |
 | `FIELD_REQUIRED` | 422 | Falta un campo obligatorio |
 | `UNKNOWN_FIELD` | 422 | Campo que no forma parte del contrato |
 | `INVALID_TYPE` | 422 | Tipo incorrecto (por ejemplo, `"85"` en lugar de `85`) |
@@ -159,6 +159,8 @@ Los errores se devuelven con códigos estables, no con frases, para que la inter
 | `VALUE_NOT_IN_CATALOG` | 422 | Valor que no está en el catálogo |
 | `BARRIO_NOT_IN_ZONE` | 422 | El barrio no pertenece al distrito |
 | `UNKNOWN_OPTION` | 422 | Clave de "más opciones" desconocida |
+| `NOT_FOUND` | 404 | Ruta inexistente |
+| `METHOD_NOT_ALLOWED` | 405 | Método no permitido en esa ruta (cabecera `Allow` con los válidos) |
 | `MODEL_NOT_LOADED` | 503 | El modelo no está cargado |
 | `INTERNAL_ERROR` | 500 | Error interno |
 

@@ -21,3 +21,8 @@ def raiz() -> RespuestaRaiz:
             "predict": f"{PREFIJO_V1}/predict",
         },
     )
+
+
+# HEAD además de GET: Render y los monitores de disponibilidad comprueban con HEAD.
+# Se registra aparte y fuera del esquema para no duplicar la operación en /docs.
+router.add_api_route("/", raiz, methods=["HEAD"], include_in_schema=False)
