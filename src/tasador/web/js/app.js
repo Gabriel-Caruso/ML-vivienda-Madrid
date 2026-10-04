@@ -1,6 +1,7 @@
 // Punto de entrada de la web: idioma, catálogo, registro de arranque, formulario y resultado.
 
 import { ErrorDeRed, predecir, urlPortfolio } from "./api.js";
+import { iniciarArbol } from "./arbol.js";
 import {
   alCambiarEstado,
   anotar,
@@ -10,6 +11,7 @@ import {
   redibujarRegistro,
 } from "./arranque.js";
 import { euros, numero } from "./formato.js";
+import { dibujarGraficos } from "./graficos.js";
 import {
   construirFormulario,
   leerPeticion,
@@ -25,10 +27,24 @@ import {
   otroIdioma,
   t,
 } from "./i18n.js";
-import { mostrarResultado, redibujarResultado } from "./resultado.js";
+import { mostrarResultado, redibujarResultado, ultimoResultado } from "./resultado.js";
+
+const ESPERA_REDIMENSION_MS = 150;
 
 let informe = null;
 let ultimosErrores = null;
+
+function redibujarGraficos() {
+  if (informe !== null) {
+    dibujarGraficos(informe, ultimoResultado());
+  }
+}
+
+let esperaRedimension = null;
+function alRedimensionar() {
+  window.clearTimeout(esperaRedimension);
+  esperaRedimension = window.setTimeout(redibujarGraficos, ESPERA_REDIMENSION_MS);
+}
 
 async function cargarJson(ruta) {
   const respuesta = await fetch(ruta);
@@ -65,6 +81,7 @@ function traducirPagina() {
   redibujarRegistro();
   redibujarResultado();
   escribirMetricas();
+  redibujarGraficos();
   actualizarBarraEstado();
   if (ultimosErrores !== null) {
     mostrarErrores(ultimosErrores, false);
@@ -107,6 +124,7 @@ async function alEnviar(evento) {
     if (respuesta.ok) {
       anotar("arranque.recibido");
       mostrarResultado(respuesta.cuerpo);
+      redibujarGraficos();
     } else if (respuesta.cuerpo && Array.isArray(respuesta.cuerpo.errors)) {
       anotar("arranque.rechazado");
       senalarErrores(respuesta.cuerpo.errors);
@@ -146,17 +164,20 @@ async function iniciar() {
   // La API empieza a despertar ya; el formulario no la espera
   esperarApi();
 
-  const [catalogo, informeModelo] = await Promise.all([
+  const [catalogo, informeModelo, arbol] = await Promise.all([
     cargarJson("datos/catalogo.json"),
     cargarJson("datos/informe_modelo.json"),
+    cargarJson("datos/arbol.json"),
   ]);
   informe = informeModelo;
+  iniciarArbol(document.getElementById("fondo-arbol"), arbol);
   construirFormulario(catalogo);
   prepararPortfolio();
   traducirPagina();
 
   document.getElementById("formulario").addEventListener("submit", alEnviar);
   document.getElementById("boton-idioma").addEventListener("click", alCambiarIdioma);
+  window.addEventListener("resize", alRedimensionar);
 }
 
 iniciar();

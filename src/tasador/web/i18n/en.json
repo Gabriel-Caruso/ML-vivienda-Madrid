@@ -2,7 +2,7 @@
   "marca": "tasador-madrid",
   "idioma": {
     "codigo": "EN",
-    "boton": "ES",
+    "boton": "[ ES ]",
     "ayuda": "switch to Spanish"
   },
   "arranque": {
@@ -52,20 +52,35 @@
   "graficos": {
     "a": {
       "titulo": "relative error by price band",
-      "lectura": "each bar is a quintile of actual price in the test set: band MAE / band median price. the marked band is the one your estimate falls in."
+      "lectura": "each bar is a quintile of actual price in the test set: band MAE / band median price. the marked band is the one your estimate falls in.",
+      "eje_y": "relative error",
+      "tu_tramo": "your band",
+      "barra": "{tramo}: relative error {error} (MAE {mae}, median {mediana}, {viviendas} homes)"
     },
     "b": {
       "titulo": "actual vs predicted price (test, log scale)",
-      "lectura": "each dot is a test home. on the diagonal, a perfect prediction. the horizontal line is your estimate."
+      "lectura": "each dot is a test home. on the diagonal, a perfect prediction. the horizontal line is your estimate.",
+      "eje_x": "actual price (€, log scale)",
+      "eje_y": "predicted price (€, log scale)",
+      "puntos": "test homes",
+      "diagonal": "perfect prediction",
+      "tu_estimacion": "your estimate",
+      "resumen": "{viviendas} test homes: actual vs predicted price, on a log scale."
     },
     "c": {
       "titulo": "feature importance",
       "lectura": "share of use of each feature in the final model. top 10, the rest grouped.",
-      "otras": "other features..."
+      "otras": "other features...",
+      "eje_x": "importance (%)",
+      "barra": "{variable}: {valor}"
     },
     "d": {
       "titulo": "MAE by model",
-      "lectura": "mean absolute error at each modelling step, cross-validated; the last point, on the test set."
+      "lectura": "mean absolute error at each modelling step, cross-validated; the last point, on the test set.",
+      "eje_x": "MAE (€)",
+      "cv": "cross-validation (train)",
+      "test": "test (deployed model)",
+      "punto": "{modelo}: MAE {mae} ({conjunto})"
     }
   },
   "modelo": {
@@ -77,7 +92,8 @@
   },
   "pie": {
     "repositorio": "repository",
-    "portfolio": "portfolio"
+    "portfolio": "portfolio",
+    "fuentes": "fonts:"
   },
   "errores": {
     "INVALID_JSON": "malformed request.",

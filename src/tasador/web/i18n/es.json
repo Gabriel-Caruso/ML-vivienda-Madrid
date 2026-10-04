@@ -2,7 +2,7 @@
   "marca": "tasador-madrid",
   "idioma": {
     "codigo": "ES",
-    "boton": "EN",
+    "boton": "[ EN ]",
     "ayuda": "cambiar a inglés"
   },
   "arranque": {
@@ -52,20 +52,35 @@
   "graficos": {
     "a": {
       "titulo": "error relativo por tramo de precio",
-      "lectura": "cada barra es un quintil de precio real en test: MAE del tramo / precio mediano del tramo. el tramo marcado es el de tu estimación."
+      "lectura": "cada barra es un quintil de precio real en test: MAE del tramo / precio mediano del tramo. el tramo marcado es el de tu estimación.",
+      "eje_y": "error relativo",
+      "tu_tramo": "tu tramo",
+      "barra": "{tramo}: error relativo {error} (MAE {mae}, mediana {mediana}, {viviendas} viviendas)"
     },
     "b": {
       "titulo": "precio real frente a predicho (test, escala logarítmica)",
-      "lectura": "cada punto es una vivienda de test. sobre la diagonal, predicción perfecta. la línea horizontal es tu estimación."
+      "lectura": "cada punto es una vivienda de test. sobre la diagonal, predicción perfecta. la línea horizontal es tu estimación.",
+      "eje_x": "precio real (€, escala log.)",
+      "eje_y": "precio predicho (€, escala log.)",
+      "puntos": "viviendas de test",
+      "diagonal": "predicción perfecta",
+      "tu_estimacion": "tu estimación",
+      "resumen": "{viviendas} viviendas de test: precio real frente a predicho, en escala logarítmica."
     },
     "c": {
       "titulo": "importancia de variables",
       "lectura": "porcentaje de uso de cada variable en el modelo final. las 10 primeras y el resto agrupado.",
-      "otras": "otras variables..."
+      "otras": "otras variables...",
+      "eje_x": "importancia (%)",
+      "barra": "{variable}: {valor}"
     },
     "d": {
       "titulo": "MAE por modelo",
-      "lectura": "error absoluto medio de cada paso del modelado, en validación cruzada; el último punto, sobre test."
+      "lectura": "error absoluto medio de cada paso del modelado, en validación cruzada; el último punto, sobre test.",
+      "eje_x": "MAE (€)",
+      "cv": "validación cruzada (train)",
+      "test": "test (modelo desplegado)",
+      "punto": "{modelo}: MAE {mae} ({conjunto})"
     }
   },
   "modelo": {
@@ -77,7 +92,8 @@
   },
   "pie": {
     "repositorio": "repositorio",
-    "portfolio": "portfolio"
+    "portfolio": "portfolio",
+    "fuentes": "fuentes:"
   },
   "errores": {
     "INVALID_JSON": "petición mal formada.",

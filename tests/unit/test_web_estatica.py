@@ -89,12 +89,16 @@ def test_sin_emojis_en_la_web():
 
 
 def test_sin_recursos_de_terceros_en_el_html():
+    """Todo lo que el navegador descarga (scripts, estilos, fuentes, iconos) es local.
+
+    Los enlaces <a> del pie pueden apuntar fuera: no se cargan al abrir la página.
+    """
     html = (RUTA_WEB / "index.html").read_text(encoding="utf-8")
-    for atributo in re.findall(r'(?:src|href)="([^"]+)"', html):
-        externo = atributo.startswith(("http://", "https://", "//"))
-        enlace_del_pie = "github.com" in atributo or "linkedin.com" in atributo
-        enlace_del_pie = enlace_del_pie or "instagram.com" in atributo
-        assert not externo or enlace_del_pie, atributo
+    recursos = re.findall(r'src="([^"]+)"', html)
+    recursos += re.findall(r'<link[^>]*href="([^"]+)"', html)
+    assert recursos
+    for recurso in recursos:
+        assert not recurso.startswith(("http://", "https://", "//")), recurso
 
 
 def test_metadata_marca_las_casas_y_chalets():

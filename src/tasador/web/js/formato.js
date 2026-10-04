@@ -34,3 +34,15 @@ export function numero(valor, idioma, decimales = 0) {
     useGrouping: "always",
   }).format(valor);
 }
+
+// Euros abreviados para ejes: 435k, 1,49M (es) / 1.49M (en).
+export function eurosCortos(valor, idioma) {
+  if (valor >= 1000000) {
+    return `${numeroCorto(valor / 1000000, idioma, 2)}M`;
+  }
+  return `${numeroCorto(valor / 1000, idioma, 0)}k`;
+}
+
+function numeroCorto(valor, idioma, decimales) {
+  return new Intl.NumberFormat(LOCALES[idioma], { maximumFractionDigits: decimales }).format(valor);
+}

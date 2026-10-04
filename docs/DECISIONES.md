@@ -13,7 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
-| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG |
 
 ---
 
@@ -322,6 +322,8 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Orden de niveles y bits:** el de `plot_tree`, de la raíz hacia abajo. El nivel L corresponde al bit (profundidad - 1 - L) del índice de hoja y la rama "Yes" al 1. Verificado con las 2.237 filas de test en los cinco niveles numéricos o binarios (coincidencia del 100 %), y comprobado de nuevo en cada ejecución del script, que falla si no se cumple. La exportación JSON del modelo lista los cortes en el orden contrario; en un árbol simétrico ambos órdenes dan las mismas 512 hojas.
 - **Cortes categóricos:** CatBoost no compara la categoría sino un estadístico del precio por categoría (CTR) discretizado. Se muestran como `ctr(zona) > 3`, sin inventar condiciones del tipo `zona = centro`.
 - **Por qué el árbol 0:** es el primero que aprendió el modelo, fácil de justificar. Alternativa descartada: elegir el más legible entre los primeros 50.
+- **Dibujo (`js/arbol.js`, paso 3):** SVG fijo a pantalla completa detrás del contenido, con las 1.022 ramas de los 9 niveles. Los niveles 0-4 nítidos y los 5-8 con opacidad decreciente. A la izquierda, en verde tenue, el corte real de cada nivel (`5: metros > 69.5`). Una vivienda de los fixtures baja un nivel cada 1,6 s, se detiene 4 s y empieza la siguiente; la animación se pausa con la pestaña oculta. Con `prefers-reduced-motion` se muestra un recorrido fijo, sin animación. Los paneles tienen fondo opaco, así que el árbol nunca queda detrás del texto.
+- **Detalle técnico:** el fondo de la página va en `html`, no en `body`. Con `z-index: -1`, el árbol queda por debajo del fondo del `body`, que lo tapaba por completo (detectado en la verificación visual).
 - **Fuentes:** https://catboost.ai/docs/en/concepts/python-reference_catboostregressor_plot_tree, https://catboost.ai/docs/en/concepts/python-reference_catboost_calc_leaf_indexes, https://github.com/catboost/tutorials/blob/master/model_analysis/model_export_as_json_tutorial.ipynb
 
 ## D-031. Catálogo estático para el formulario
@@ -332,10 +334,10 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 ## D-032. Fuentes
 
-- **Estado:** aprobada. Se alojan en el proyecto en el paso 3, con sus licencias.
+- **Estado:** aprobada. Alojadas en `web/fuentes/` en el paso 3, sin modificar, con sus licencias y un `CREDITOS.txt`: `WebPlus_IBM_VGA_9x16.woff` (pack 2.2) e `IBMPlexMono-Regular.woff2` / `IBMPlexMono-Bold.woff2` (IBM Plex Mono 2.5.0, release oficial de IBM). Ninguna se carga de Google Fonts ni de un CDN.
 - **Qué:** IBM VGA 9x16 en su variante "Plus" (Ultimate Oldschool PC Font Pack 2.2, de VileR) para títulos, marca y bordes; IBM Plex Mono para el resto.
 - **Licencias:** Oldschool PC Font Pack, CC BY-SA 4.0: exige atribución ("VileR", con enlace a https://int10h.org/oldschool-pc-fonts/), que irá en el pie. IBM Plex Mono, SIL OFL 1.1.
-- **Cobertura comprobada:** IBM VGA 9x16 Plus tiene tildes, ñ, ª, € y caracteres de caja. La variante "437" no tiene ÁÍÓÚ ni €.
+- **Cobertura comprobada:** IBM VGA 9x16 Plus tiene tildes, ñ, ª, € y caracteres de caja. La variante "437" no tiene ÁÍÓÚ ni €. Ninguna de las dos fuentes tiene triángulos (▶ ▼), por eso "más opciones" usa `[+]` / `[-]`.
 - **Alternativa descartada:** VT323 (OFL 1.1), sin caracteres de caja.
 - **Incertidumbre:** se entiende que la cláusula ShareAlike solo afecta a modificaciones de la fuente, no a la web que la usa. No es asesoramiento legal.
 
@@ -369,6 +371,42 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Qué:** la app sirve todos los archivos de la web con `Cache-Control: no-cache`: el navegador puede guardarlos, pero los revalida con el servidor (ETag) en cada carga y solo los vuelve a descargar si han cambiado. Las respuestas de la API no llevan esa cabecera.
 - **Pendiente (paso 4):** la misma cabecera en el Static Site de Render (regla `/*` en `render.yaml` y en el panel).
 - **Alternativas descartadas:** `fetch(..., { cache: "no-cache" })` en el JavaScript (no cubre los propios módulos JS ni el CSS); nombres de archivo con huella (`app.3f2a.js`), que exigirían un paso de build.
+
+## D-037. Estética de terminal y lista "que no parezca hecha por una IA"
+
+- **Estado:** aprobada (requisitos de la fase 2). Implementada en el paso 3; repaso completo en el paso 4.
+- **Qué:** paleta A (D-033); IBM VGA 9x16 para marca, títulos, registro y barra de estado e IBM Plex Mono para el resto; paneles con borde de 1 px y título sobre el borde entre `┤ ├`, como en una interfaz de terminal; prompt `$`, cursor `█` parpadeante, casillas `[ ]` / `[x]`, selectores con `[v]`, botones `[ CALCULAR ]` en vídeo inverso al recibir foco o pulsarse, errores en vídeo inverso con `ERROR:`, aviso con `[!]`, barra de estado inferior en vídeo inverso, enlaces del pie como `~/github`.
+- **Lista de comprobación (paso 0), con comprobación automática donde se puede (`tests/unit/test_web_estetica.py`):**
+  1. `border-radius` siempre 0 (test).
+  2. Sin `box-shadow`, `text-shadow` ni `drop-shadow` (test).
+  3. Sin degradados, `backdrop-filter`, desenfoques ni `filter` (test).
+  4. Solo IBM VGA e IBM Plex Mono; sin Inter, `system-ui`, Roboto, Helvetica, Arial ni `sans-serif` (test).
+  5. Sin hero centrado: la página empieza con la marca y el registro de arranque.
+  6. Sin cuadrícula de tres tarjetas de características.
+  7. Sin píldoras ni badges: los estados son texto (`[!]`, `ERROR:`).
+  8. Sin iconos de librerías ni emojis (tests de iconos, CDN y emojis).
+  9. Sin violeta, índigo ni azules: solo los cuatro colores de la paleta (test).
+  10. Espaciado en `ch` y en múltiplos de la altura de línea, no la escala de Tailwind.
+  11. Sin animaciones al pasar el ratón; la única animación es el parpadeo del cursor, que se desactiva con `prefers-reduced-motion` (tests).
+  12. Textos breves en minúscula de terminal, sin lenguaje de marketing.
+  13. Botones como comandos entre corchetes.
+  14. Separadores de línea discontinua de 1 px, sin `<hr>` por defecto.
+  15. Sin animaciones al hacer scroll, contadores ni esqueletos de carga: la espera se muestra en el registro.
+  16. Sin modales, toasts ni banners de cookies.
+- **Concesión:** al pasar el ratón por un botón, este se pone en vídeo inverso (cambio instantáneo, sin transición). No es una animación decorativa: es la forma de señalar el elemento activo en una interfaz de terminal.
+- **Verificado en Chrome (local):** a 1440 px y a 390 px (esta última en un `iframe` de 390 × 844, porque la ventana de Chrome no se puede estrechar tanto), sin desbordamiento horizontal. Ajustes hechos tras verlo: el árbol tapado por el fondo, etiquetas de eje sin decimales sobrantes, alineación de planta, ascensor y localización, leyenda y etiqueta del gráfico B, y disposición compacta de los gráficos en pantallas estrechas.
+- **No verificado en navegador:** `prefers-reduced-motion` (la extensión no puede emularlo); se cubre con tests que comprueban las reglas del CSS y la rama del JavaScript.
+
+## D-038. Gráficos en SVG propio
+
+- **Estado:** aprobada (requisitos de la fase 2). Implementada en el paso 3 (`js/graficos.js`).
+- **Qué:** cuatro gráficos dibujados a mano en SVG, sin librerías, al ancho real de su contenedor (se redibujan al cambiar el tamaño de la ventana, el idioma o el resultado). Cada uno tiene título, línea de lectura y ejes con unidades en ambos idiomas, `aria-label` con su resumen y un `<title>` por marca (información al pasar el ratón).
+  - **A, error relativo por tramo:** barras huecas por quintil con su porcentaje; el tramo de la estimación se rellena y lleva la etiqueta `[tu tramo]`, así que no se distingue solo por el color.
+  - **B, real frente a predicho:** 2.237 puntos en escala logarítmica, diagonal discontinua (predicción perfecta) y línea continua gruesa con la estimación, cuya etiqueta lleva fondo opaco y el precio redondeado a miles como el resultado. Leyenda con la forma o el trazo de cada serie.
+  - **C, importancia de variables:** barras horizontales de las 10 primeras y una barra discontinua "otras variables…" con el resto (D-029).
+  - **D, MAE por modelo:** puntos unidos por una línea; cuadrado relleno para validación cruzada y rombo hueco para test, con leyenda.
+- **Pantallas estrechas (< 480 px de gráfico):** etiquetas del eje del gráfico A en dos líneas, solo tres rótulos en el eje X del B, leyenda del D en dos filas y el nombre de cada modelo encima de su punto.
+- **Reglas del proyecto sobre la guía general de visualización:** la paleta es la monocroma aprobada (los colores los decide el responsable del proyecto) y las marcas tienen esquinas rectas; las series se distinguen por marcador y tipo de trazo, como piden las reglas de diseño.
 
 ---
 

@@ -1,0 +1,13 @@
+Fuentes alojadas en esta carpeta
+
+WebPlus_IBM_VGA_9x16.woff
+  The Ultimate Oldschool PC Font Pack, versión 2.2, de VileR.
+  https://int10h.org/oldschool-pc-fonts/
+  Licencia: Creative Commons Attribution-ShareAlike 4.0 International
+  (texto completo en LICENCIA-oldschool-pc-font-pack.txt). Se usa sin modificar.
+
+IBMPlexMono-Regular.woff2, IBMPlexMono-Bold.woff2
+  IBM Plex Mono, versión 2.5.0, Copyright 2017 IBM Corp.
+  https://github.com/IBM/plex
+  Licencia: SIL Open Font License 1.1 (texto completo en LICENCIA-ibm-plex.txt).
+  Se usa sin modificar.
