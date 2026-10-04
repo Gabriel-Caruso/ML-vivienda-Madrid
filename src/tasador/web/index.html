@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>tasador-madrid</title>
   <meta name="description" content="Estimación orientativa del precio de venta de una vivienda en Madrid con un modelo CatBoost entrenado con anuncios de Idealista de 2025.">
-  <meta name="theme-color" content="#060a06">
+  <meta name="theme-color" content="#000000">
   <meta property="og:type" content="website">
   <meta property="og:title" content="tasador-madrid">
   <meta property="og:description" content="Estimación orientativa del precio de venta de una vivienda en Madrid con un modelo CatBoost.">
   <meta property="og:url" content="https://ml-vivienda-madrid-1.onrender.com/">
   <meta property="og:locale" content="es_ES">
   <meta property="og:locale:alternate" content="en_GB">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://ml-vivienda-madrid-1.onrender.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="tasador-madrid: estimación orientativa del precio de venta de una vivienda en Madrid">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fuentes/IBMPlexMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fuentes/WebPlus_IBM_VGA_9x16.woff" as="font" type="font/woff" crossorigin>
@@ -24,14 +28,19 @@
   <svg id="fondo-arbol" class="fondo-arbol" aria-hidden="true" focusable="false"></svg>
 
   <header class="cabecera">
-    <p class="marca"><span class="prompt">$</span> <span data-i18n="marca">tasador-madrid</span><span class="cursor" aria-hidden="true">█</span></p>
-    <button type="button" id="boton-idioma" class="boton-comando" aria-describedby="idioma-ayuda">[ EN ]</button>
+    <button type="button" id="boton-idioma" class="boton-comando boton-idioma" aria-describedby="idioma-ayuda">[ EN ]</button>
     <span id="idioma-ayuda" class="solo-lectores" data-i18n="idioma.ayuda">cambiar idioma</span>
+    <h1><span class="solo-lectores" data-i18n="marca">tasador-madrid</span><pre class="logo-ascii" aria-hidden="true">█████  ███   ████  ███  ████   ███  ████
+  █   █   █ █     █   █ █   █ █   █ █   █
+  █   █████  ███  █████ █   █ █   █ ████
+  █   █   █     █ █   █ █   █ █   █ █  █
+  █   █   █ ████  █   █ ████   ███  █   █</pre></h1>
+    <p class="subtitulo"><span class="prompt">$</span> <span data-i18n="subtitulo">Estimación orientativa del precio de venta de una vivienda en Madrid</span><span class="cursor" aria-hidden="true">█</span></p>
   </header>
 
   <main class="pagina">
     <section class="ventana arranque" aria-labelledby="titulo-arranque">
-      <h1 id="titulo-arranque" class="titulo-ventana" data-i18n="arranque.titulo">registro de arranque</h1>
+      <h2 id="titulo-arranque" class="titulo-ventana" data-i18n="arranque.titulo">registro de arranque</h2>
       <ol id="registro" class="registro" role="log" aria-live="polite"></ol>
     </section>
 
@@ -117,7 +126,7 @@
         </form>
       </section>
 
-      <section class="ventana resultado" aria-labelledby="titulo-resultado">
+      <section class="ventana ventana-destacada resultado" aria-labelledby="titulo-resultado">
         <h2 id="titulo-resultado" class="titulo-ventana" data-i18n="resultado.titulo">resultado</h2>
         <div id="resultado" class="caja-resultado" aria-live="polite" aria-atomic="true">
           <p class="resultado-vacio" data-i18n="resultado.vacio">rellena el formulario y pulsa calcular.</p>
@@ -140,14 +149,19 @@
       </section>
     </div>
 
-    <section class="ventana sobre-modelo" aria-labelledby="titulo-modelo">
+    <section class="ventana ventana-destacada sobre-modelo" aria-labelledby="titulo-modelo">
       <h2 id="titulo-modelo" class="titulo-ventana" data-i18n="modelo.titulo">sobre el modelo</h2>
-      <div class="texto-modelo">
-        <p data-i18n="modelo.que_es">un CatBoostRegressor que estima el precio de venta.</p>
-        <p id="metricas-modelo"></p>
-        <p data-i18n="modelo.limitaciones">limitaciones</p>
-        <p data-i18n="modelo.autoria">autoría</p>
-      </div>
+      <article class="manual">
+        <p class="cabecera-manual" aria-hidden="true"><span>TASADOR(1)</span><span data-i18n="modelo.manual">Manual de usuario</span><span>TASADOR(1)</span></p>
+        <h3 data-i18n="modelo.que_es_titulo">QUÉ ES</h3>
+        <p data-texto-modelo="que_es"></p>
+        <h3 data-i18n="modelo.precision_titulo">PRECISIÓN</h3>
+        <p data-texto-modelo="precision"></p>
+        <h3 data-i18n="modelo.limitaciones_titulo">LIMITACIONES</h3>
+        <p data-texto-modelo="limitaciones"></p>
+        <h3 data-i18n="modelo.autoria_titulo">AUTORÍA</h3>
+        <p data-texto-modelo="autoria"></p>
+      </article>
       <div class="graficos-modelo">
         <figure class="grafico" id="grafico-c">
           <figcaption>
@@ -183,11 +197,11 @@
   </footer>
 
   <div class="barra-estado" role="status">
-    <span><span data-i18n="estado.api">api</span>: <span id="estado-api" data-i18n="estado.conectando">conectando</span></span>
+    <span><span data-i18n="estado.api">api</span>: <span id="estado-api" class="valor-estado" data-estado="conectando" data-i18n="estado.conectando">conectando</span></span>
     <span class="separador" aria-hidden="true">│</span>
-    <span><span data-i18n="estado.modelo">modelo</span>: <span id="estado-modelo">catboost</span></span>
+    <span><span data-i18n="estado.modelo">modelo</span>: <span id="estado-modelo" class="valor-estado">catboost</span></span>
     <span class="separador" aria-hidden="true">│</span>
-    <span><span data-i18n="estado.idioma">idioma</span>: <span id="estado-idioma">ES</span></span>
+    <span><span data-i18n="estado.idioma">idioma</span>: <span id="estado-idioma" class="valor-estado">ES</span></span>
   </div>
 </body>
 </html>

@@ -10,7 +10,7 @@ import {
   iniciarRegistro,
   redibujarRegistro,
 } from "./arranque.js";
-import { euros, numero } from "./formato.js";
+import { euros, numero, porcentaje } from "./formato.js";
 import { dibujarGraficos } from "./graficos.js";
 import {
   construirFormulario,
@@ -22,6 +22,7 @@ import {
 import {
   aplicarTraducciones,
   cargarIdioma,
+  escribirConResaltado,
   idioma,
   idiomaInicial,
   otroIdioma,
@@ -32,6 +33,7 @@ import { mostrarResultado, redibujarResultado, ultimoResultado } from "./resulta
 const ESPERA_REDIMENSION_MS = 150;
 
 let informe = null;
+let catalogo = null;
 let ultimosErrores = null;
 
 function redibujarGraficos() {
@@ -55,7 +57,9 @@ async function cargarJson(ruta) {
 }
 
 function actualizarBarraEstado() {
-  document.getElementById("estado-api").textContent = t(`estado.${estadoApi()}`);
+  const estadoApiElemento = document.getElementById("estado-api");
+  estadoApiElemento.textContent = t(`estado.${estadoApi()}`);
+  estadoApiElemento.dataset.estado = estadoApi();
   document.getElementById("estado-idioma").textContent = t("idioma.codigo");
   if (informe !== null) {
     document.getElementById("estado-modelo").textContent =
@@ -63,15 +67,46 @@ function actualizarBarraEstado() {
   }
 }
 
-function escribirMetricas() {
+// Textos de "sobre el modelo" con sus cifras reales (informe y catálogo).
+function escribirTextosModelo() {
   const actual = idioma();
+  const tramos = informe.error_por_tramo;
+  let errorMinimo = tramos[0].error_relativo;
+  let errorMaximo = tramos[0].error_relativo;
+  for (let posicion = 0; posicion < tramos.length - 1; posicion += 1) {
+    errorMinimo = Math.min(errorMinimo, tramos[posicion].error_relativo);
+    errorMaximo = Math.max(errorMaximo, tramos[posicion].error_relativo);
+  }
+  const lujo = tramos[tramos.length - 1];
+  let barrios = 0;
+  for (const distrito of catalogo.districts) {
+    barrios += distrito.neighbourhoods.length;
+  }
   const metricas = informe.metricas_test;
-  document.getElementById("metricas-modelo").textContent = t("modelo.metricas", {
-    viviendas: numero(informe.modelo.viviendas_test, actual),
-    mae: euros(metricas.mae, actual),
-    rmse: euros(metricas.rmse, actual),
-    r2: numero(metricas.r2, actual, 3),
-  });
+  const parametros = {
+    que_es: {
+      arboles: numero(informe.modelo.arboles, actual),
+      profundidad: informe.modelo.profundidad,
+      variables: informe.modelo.variables,
+      indicadores: informe.modelo.variables - catalogo.fields.length,
+    },
+    precision: {
+      viviendas: numero(informe.modelo.viviendas_test, actual),
+      mae: euros(metricas.mae, actual),
+      rmse: euros(metricas.rmse, actual),
+      r2: numero(metricas.r2, actual, 3),
+      error_min: porcentaje(errorMinimo, actual, 1),
+      error_max: porcentaje(errorMaximo, actual, 1),
+      error_lujo: porcentaje(lujo.error_relativo, actual, 1),
+      umbral: numero(lujo.limite_inferior / 1000000, actual, 2),
+    },
+    limitaciones: { distritos: catalogo.districts.length, barrios },
+    autoria: {},
+  };
+  for (const parrafo of document.querySelectorAll("[data-texto-modelo]")) {
+    const clave = parrafo.dataset.textoModelo;
+    escribirConResaltado(parrafo, t(`modelo.${clave}`, parametros[clave]));
+  }
 }
 
 function traducirPagina() {
@@ -80,7 +115,7 @@ function traducirPagina() {
   traducirFormulario();
   redibujarRegistro();
   redibujarResultado();
-  escribirMetricas();
+  escribirTextosModelo();
   redibujarGraficos();
   actualizarBarraEstado();
   if (ultimosErrores !== null) {
@@ -164,12 +199,13 @@ async function iniciar() {
   // La API empieza a despertar ya; el formulario no la espera
   esperarApi();
 
-  const [catalogo, informeModelo, arbol] = await Promise.all([
+  const [catalogoWeb, informeModelo, arbol] = await Promise.all([
     cargarJson("datos/catalogo.json"),
     cargarJson("datos/informe_modelo.json"),
     cargarJson("datos/arbol.json"),
   ]);
   informe = informeModelo;
+  catalogo = catalogoWeb;
   iniciarArbol(document.getElementById("fondo-arbol"), arbol);
   construirFormulario(catalogo);
   prepararPortfolio();

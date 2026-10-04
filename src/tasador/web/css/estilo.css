@@ -1,4 +1,6 @@
-/* Tema de terminal de fósforo verde (paleta A, D-033).
+/* Tema de terminal con la paleta VGA de 16 colores (DOS, 1987), D-039.
+   Cada color tiene una función: el texto es gris, los títulos amarillos, los
+   acentos verdes, los enlaces cian y los errores rojos.
    Reglas del proyecto: esquinas rectas, sin sombras, sin degradados, sin
    desenfoques, sin animaciones decorativas. Solo el cursor parpadea, y deja de
    hacerlo con prefers-reduced-motion. */
@@ -28,10 +30,19 @@
 }
 
 :root {
-  --fondo: #060a06;
-  --principal: #33ff66;
-  --atenuado: #1f9d45;
-  --tenue: #0f3d1c;
+  /* Paleta VGA: solo se usan estos valores */
+  --fondo: #000000;
+  --texto: #aaaaaa;
+  --blanco: #ffffff;
+  --amarillo: #ffff55;
+  --verde: #55ff55;
+  --cian: #55ffff;
+  --rojo: #ff5555;
+  --gris: #555555;
+  --rojo-oscuro: #aa0000;
+  --verde-oscuro: #00aa00;
+  --cian-oscuro: #00aaaa;
+
   --fuente-pixel: "IBM VGA", "IBM Plex Mono", monospace;
   --fuente-texto: "IBM Plex Mono", monospace;
   --linea: 1.5rem;
@@ -45,15 +56,15 @@
   border-radius: 0;
 }
 
+/* El fondo va solo en html: si el body tuviera fondo, taparía el árbol (z-index: -1) */
 html {
   background: var(--fondo);
 }
 
-/* El fondo va solo en html: si el body tuviera fondo, taparía el árbol (z-index: -1) */
 body {
   margin: 0;
   padding: 0 2ch calc(var(--linea) * 3);
-  color: var(--principal);
+  color: var(--texto);
   font-family: var(--fuente-texto);
   font-size: 15px;
   line-height: var(--linea);
@@ -75,30 +86,46 @@ body {
 p,
 ol,
 ul,
-figure {
+figure,
+pre {
   margin: 0;
 }
 
 h1,
-h2 {
+h2,
+h3 {
   margin: 0;
   font-size: inherit;
   font-weight: 400;
 }
 
 a {
-  color: var(--principal);
+  color: var(--cian);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
+a:hover,
+a:focus-visible {
+  background: var(--cian);
+  color: var(--fondo);
+  text-decoration: none;
+  outline: 0;
+}
+
+mark {
+  background: var(--amarillo);
+  color: var(--fondo);
+  padding: 0 0.5ch;
+}
+
 ::selection {
-  background: var(--principal);
+  background: var(--amarillo);
   color: var(--fondo);
 }
 
 :focus-visible {
-  outline: 2px solid var(--principal);
+  outline: 2px solid var(--amarillo);
   outline-offset: 2px;
 }
 
@@ -111,47 +138,56 @@ a {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
+  opacity: 0.35;
 }
 
 .fondo-arbol .rama {
-  stroke: var(--tenue);
+  stroke: var(--verde-oscuro);
   stroke-width: 1;
   fill: none;
 }
 
 .fondo-arbol .rama-recorrida {
-  stroke: var(--atenuado);
+  stroke: var(--verde);
 }
 
 .fondo-arbol .corte {
-  fill: var(--tenue);
+  fill: var(--verde-oscuro);
   font-family: var(--fuente-pixel);
   font-size: 16px;
 }
 
-/* --- Cabecera y estructura ---------------------------------------------- */
+/* --- Cabecera: arte ASCII centrado -------------------------------------- */
 
 .cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2ch;
+  position: relative;
   max-width: 1360px;
   margin: 0 auto;
-  padding: var(--linea) 0;
+  padding: calc(var(--linea) * 1.5) 0 var(--linea);
+  text-align: center;
 }
 
-.marca {
+.logo-ascii {
+  display: inline-block;
+  color: var(--amarillo);
   font-family: var(--fuente-pixel);
-  font-size: 32px;
-  line-height: 32px;
+  font-size: 16px;
+  line-height: 16px;
+  text-align: left;
+}
+
+.subtitulo {
+  margin-top: var(--linea);
+  font-family: var(--fuente-pixel);
+  font-size: 16px;
 }
 
 .prompt {
-  color: var(--atenuado);
+  color: var(--verde);
 }
 
 .cursor {
+  color: var(--verde);
   animation: parpadeo 1s steps(1) infinite;
 }
 
@@ -160,6 +196,14 @@ a {
     opacity: 0;
   }
 }
+
+.boton-idioma {
+  position: absolute;
+  top: var(--linea);
+  right: 0;
+}
+
+/* --- Estructura --------------------------------------------------------- */
 
 .pagina {
   display: flex;
@@ -186,7 +230,7 @@ a {
 
 .ventana {
   position: relative;
-  border: 1px solid var(--atenuado);
+  border: 1px solid var(--gris);
   background: var(--fondo);
   padding: calc(var(--linea) * 1.25) 2ch var(--linea);
 }
@@ -197,6 +241,7 @@ a {
   left: 1ch;
   padding: 0 1ch;
   background: var(--fondo);
+  color: var(--amarillo);
   font-family: var(--fuente-pixel);
   font-size: 16px;
   line-height: var(--linea);
@@ -204,12 +249,34 @@ a {
 
 .titulo-ventana::before {
   content: "┤ ";
-  color: var(--atenuado);
+  color: var(--gris);
 }
 
 .titulo-ventana::after {
   content: " ├";
-  color: var(--atenuado);
+  color: var(--gris);
+}
+
+/* Paneles destacados: barra de título sólida, como las ventanas de Norton Commander */
+
+.ventana-destacada {
+  padding-top: 0;
+  border-color: var(--amarillo);
+}
+
+.ventana-destacada .titulo-ventana {
+  position: static;
+  display: block;
+  margin: 0 -2ch var(--linea);
+  padding: 0 2ch;
+  background: var(--amarillo);
+  color: var(--fondo);
+  text-align: center;
+}
+
+.ventana-destacada .titulo-ventana::before,
+.ventana-destacada .titulo-ventana::after {
+  content: none;
 }
 
 /* --- Registro de arranque ----------------------------------------------- */
@@ -221,9 +288,18 @@ a {
   font-size: 16px;
 }
 
+.registro li::first-letter {
+  color: var(--verde);
+}
+
+.registro li:last-child {
+  color: var(--blanco);
+}
+
 .registro li:last-child::after {
   content: "█";
   margin-left: 1ch;
+  color: var(--verde);
   animation: parpadeo 1s steps(1) infinite;
 }
 
@@ -256,11 +332,12 @@ a {
 
 .campo > label:first-child {
   display: block;
-  color: var(--atenuado);
+  color: var(--texto);
 }
 
 .campo > label:first-child::before {
   content: "> ";
+  color: var(--verde);
 }
 
 input[type="text"],
@@ -269,9 +346,9 @@ select {
   width: 100%;
   margin: 0;
   padding: 0.25rem 1ch;
-  border: 1px solid var(--atenuado);
+  border: 1px solid var(--gris);
   background: var(--fondo);
-  color: var(--principal);
+  color: var(--blanco);
   font: inherit;
   appearance: none;
 }
@@ -287,25 +364,25 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 input::placeholder {
-  color: var(--atenuado);
+  color: var(--gris);
   opacity: 1;
 }
 
 input:disabled,
 select:disabled {
   border-style: dashed;
-  color: var(--atenuado);
+  color: var(--gris);
 }
 
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--principal);
+  outline: 2px solid var(--amarillo);
   outline-offset: 0;
-  border-color: var(--principal);
+  border-color: var(--amarillo);
 }
 
 [aria-invalid="true"] {
-  border-color: var(--principal);
+  border-color: var(--rojo);
   border-width: 2px;
 }
 
@@ -320,7 +397,7 @@ select:focus-visible {
   top: 50%;
   right: 1ch;
   transform: translateY(-50%);
-  color: var(--atenuado);
+  color: var(--verde);
   pointer-events: none;
 }
 
@@ -330,15 +407,14 @@ select:focus-visible {
 
 option {
   background: var(--fondo);
-  color: var(--principal);
+  color: var(--blanco);
 }
 
 .rango-campo,
 .aviso-casa,
-.aviso,
 .lectura-grafico,
 .creditos {
-  color: var(--atenuado);
+  color: var(--gris);
 }
 
 /* Casillas dibujadas como [ ] / [x] */
@@ -357,7 +433,7 @@ input[type="checkbox"] {
   width: 3ch;
   flex: none;
   font: inherit;
-  color: var(--principal);
+  color: var(--verde);
   cursor: pointer;
 }
 
@@ -369,12 +445,16 @@ input[type="checkbox"]:checked::before {
   content: "[x]";
 }
 
+input[type="checkbox"]:checked + span {
+  color: var(--blanco);
+}
+
 input[type="checkbox"]:focus-visible {
-  outline: 2px solid var(--principal);
+  outline: 2px solid var(--amarillo);
   outline-offset: 0;
 }
 
-/* Desplegable con búsqueda */
+/* Desplegable con búsqueda: opción activa en negro sobre cian, como un menú de DOS */
 
 .combobox {
   position: relative;
@@ -391,9 +471,10 @@ input[type="checkbox"]:focus-visible {
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid var(--principal);
+  border: 1px solid var(--cian);
   border-top: 0;
   background: var(--fondo);
+  color: var(--blanco);
 }
 
 .combobox li {
@@ -402,12 +483,12 @@ input[type="checkbox"]:focus-visible {
 }
 
 .combobox li[aria-selected="true"] {
-  background: var(--principal);
+  background: var(--cian);
   color: var(--fondo);
 }
 
 .combobox li[aria-disabled="true"] {
-  color: var(--atenuado);
+  color: var(--gris);
   cursor: default;
 }
 
@@ -421,6 +502,11 @@ input[type="checkbox"]:focus-visible {
   list-style: none;
   cursor: pointer;
   width: max-content;
+  color: var(--blanco);
+}
+
+.mas-opciones summary [aria-hidden="true"] {
+  color: var(--verde);
 }
 
 .mas-opciones summary::-webkit-details-marker {
@@ -445,7 +531,7 @@ input[type="checkbox"]:focus-visible {
 .grupos-opciones fieldset {
   margin: 0;
   padding: var(--linea) 2ch calc(var(--linea) / 2);
-  border: 1px dashed var(--atenuado);
+  border: 1px dashed var(--gris);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(24ch, 1fr));
   column-gap: 2ch;
@@ -453,7 +539,7 @@ input[type="checkbox"]:focus-visible {
 
 .grupos-opciones legend {
   padding: 0 1ch;
-  color: var(--atenuado);
+  color: var(--amarillo);
 }
 
 /* Botones: comandos entre corchetes; foco y pulsación en vídeo inverso */
@@ -463,7 +549,7 @@ input[type="checkbox"]:focus-visible {
   padding: 0.25rem 1ch;
   border: 0;
   background: transparent;
-  color: var(--principal);
+  color: var(--verde);
   font-family: var(--fuente-pixel);
   font-size: 16px;
   cursor: pointer;
@@ -472,13 +558,13 @@ input[type="checkbox"]:focus-visible {
 .boton-comando:hover,
 .boton-comando:focus-visible,
 .boton-comando:active {
-  background: var(--principal);
+  background: var(--verde);
   color: var(--fondo);
   outline: 0;
 }
 
 .boton-comando:disabled {
-  color: var(--atenuado);
+  color: var(--gris);
   background: transparent;
   cursor: progress;
 }
@@ -488,14 +574,14 @@ input[type="checkbox"]:focus-visible {
   line-height: 32px;
 }
 
-/* Errores: vídeo inverso con prefijo ERROR: (D-033) */
+/* Errores: vídeo inverso en rojo con prefijo ERROR: */
 
 .error-campo,
 .errores-formulario p {
   display: inline-block;
   margin-top: 0.25rem;
   padding: 0 1ch;
-  background: var(--principal);
+  background: var(--rojo);
   color: var(--fondo);
   font-weight: 700;
 }
@@ -515,18 +601,16 @@ input[type="checkbox"]:focus-visible {
 }
 
 .resultado-vacio {
-  color: var(--atenuado);
-}
-
-.resultado-etiqueta {
-  color: var(--atenuado);
+  color: var(--gris);
 }
 
 .resultado-etiqueta::before {
   content: "$ ";
+  color: var(--verde);
 }
 
 .resultado-precio {
+  color: var(--amarillo);
   font-family: var(--fuente-pixel);
   font-size: 48px;
   line-height: 56px;
@@ -535,16 +619,64 @@ input[type="checkbox"]:focus-visible {
 .resultado-margen,
 .resultado-horquilla {
   font-size: 13px;
-  color: var(--atenuado);
 }
 
 .aviso {
   margin-bottom: var(--linea);
   font-size: 13px;
+  color: var(--gris);
 }
 
 .aviso::before {
   content: "[!] ";
+  color: var(--amarillo);
+}
+
+/* --- Sobre el modelo: página de manual Unix ----------------------------- */
+
+.manual {
+  max-width: 76ch;
+  margin: 0 auto;
+}
+
+.cabecera-manual {
+  display: flex;
+  justify-content: space-between;
+  gap: 2ch;
+  margin-bottom: var(--linea);
+  color: var(--blanco);
+  font-family: var(--fuente-pixel);
+  font-size: 16px;
+}
+
+.manual h3 {
+  margin-top: var(--linea);
+  color: var(--verde);
+  font-family: var(--fuente-pixel);
+  font-size: 16px;
+}
+
+.manual p {
+  margin-left: 4ch;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Los resaltados no se parten con guion: se leen enteros */
+.manual mark {
+  hyphens: manual;
+}
+
+.graficos-modelo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 4ch;
+}
+
+@media (min-width: 64rem) {
+  .graficos-modelo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* --- Gráficos ----------------------------------------------------------- */
@@ -552,7 +684,7 @@ input[type="checkbox"]:focus-visible {
 .grafico {
   margin-top: var(--linea);
   padding-top: var(--linea);
-  border-top: 1px dashed var(--atenuado);
+  border-top: 1px dashed var(--rojo-oscuro);
 }
 
 .grafico figcaption {
@@ -561,6 +693,7 @@ input[type="checkbox"]:focus-visible {
 }
 
 .titulo-grafico {
+  color: var(--blanco);
   font-family: var(--fuente-pixel);
   font-size: 16px;
 }
@@ -580,95 +713,82 @@ input[type="checkbox"]:focus-visible {
 
 .lienzo-grafico .eje,
 .lienzo-grafico .marca-eje {
-  stroke: var(--atenuado);
+  stroke: var(--gris);
   stroke-width: 1;
 }
 
 .lienzo-grafico .rejilla {
-  stroke: var(--tenue);
+  stroke: var(--gris);
   stroke-width: 1;
+  stroke-dasharray: 1 3;
 }
 
 .lienzo-grafico .texto-eje,
 .lienzo-grafico .titulo-eje {
-  fill: var(--atenuado);
+  fill: var(--texto);
 }
 
 .lienzo-grafico .texto-valor {
-  fill: var(--principal);
+  fill: var(--blanco);
 }
 
 .lienzo-grafico .barra {
   fill: none;
-  stroke: var(--principal);
+  stroke: var(--verde);
   stroke-width: 1;
 }
 
-.lienzo-grafico .barra-marcada,
 .lienzo-grafico .barra-llena {
-  fill: var(--principal);
+  fill: var(--verde);
+}
+
+.lienzo-grafico .barra-marcada {
+  fill: var(--amarillo);
+  stroke: var(--amarillo);
 }
 
 .lienzo-grafico .texto-marcado {
-  fill: var(--principal);
+  fill: var(--amarillo);
   font-weight: 700;
 }
 
 .lienzo-grafico .punto {
-  fill: var(--atenuado);
+  fill: var(--cian-oscuro);
 }
 
 .lienzo-grafico .diagonal {
-  stroke: var(--principal);
+  stroke: var(--blanco);
   stroke-width: 1;
   stroke-dasharray: 6 4;
   fill: none;
 }
 
 .lienzo-grafico .linea-usuario {
-  stroke: var(--principal);
+  stroke: var(--amarillo);
   stroke-width: 2;
   fill: none;
 }
 
 .lienzo-grafico .fondo-etiqueta {
   fill: var(--fondo);
-  stroke: var(--principal);
+  stroke: var(--amarillo);
   stroke-width: 1;
 }
 
 .lienzo-grafico .linea-serie {
-  stroke: var(--atenuado);
+  stroke: var(--gris);
   stroke-width: 1;
   fill: none;
 }
 
 .lienzo-grafico .marcador {
-  fill: var(--principal);
+  fill: var(--verde);
 }
 
 .lienzo-grafico .marcador-hueco {
   fill: var(--fondo);
-  stroke: var(--principal);
+  stroke: var(--cian);
   stroke-width: 2;
-}
-
-.graficos-modelo {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  column-gap: 4ch;
-}
-
-@media (min-width: 64rem) {
-  .graficos-modelo {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.texto-modelo {
-  display: grid;
-  gap: calc(var(--linea) / 2);
-  max-width: 100ch;
 }
 
 /* --- Pie y barra de estado ---------------------------------------------- */
@@ -677,12 +797,14 @@ input[type="checkbox"]:focus-visible {
   max-width: 1360px;
   margin: calc(var(--linea) * 2) auto 0;
   padding-top: var(--linea);
-  border-top: 1px solid var(--atenuado);
+  border-top: 1px dashed var(--rojo-oscuro);
+  text-align: center;
 }
 
 .enlaces {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 1ch 3ch;
   padding: 0;
   list-style: none;
@@ -690,7 +812,7 @@ input[type="checkbox"]:focus-visible {
 
 .enlaces li::before {
   content: "~/";
-  color: var(--atenuado);
+  color: var(--gris);
 }
 
 .creditos {
@@ -699,7 +821,7 @@ input[type="checkbox"]:focus-visible {
 }
 
 .creditos a {
-  color: var(--atenuado);
+  color: var(--texto);
 }
 
 .barra-estado {
@@ -712,11 +834,29 @@ input[type="checkbox"]:focus-visible {
   flex-wrap: wrap;
   gap: 0 1ch;
   padding: 0 2ch;
-  background: var(--principal);
-  color: var(--fondo);
+  border-top: 1px solid var(--gris);
+  background: var(--fondo);
+  color: var(--gris);
   font-family: var(--fuente-pixel);
   font-size: 16px;
   line-height: var(--linea);
+}
+
+.barra-estado .valor-estado {
+  color: var(--texto);
+}
+
+.barra-estado [data-estado="online"] {
+  color: var(--verde);
+}
+
+.barra-estado [data-estado="despertando"],
+.barra-estado [data-estado="conectando"] {
+  color: var(--amarillo);
+}
+
+.barra-estado [data-estado="offline"] {
+  color: var(--rojo);
 }
 
 /* --- Pantallas estrechas ------------------------------------------------ */
@@ -728,14 +868,29 @@ input[type="checkbox"]:focus-visible {
     font-size: 14px;
   }
 
-  .marca {
-    font-size: 22px;
-    line-height: 24px;
+  .logo-ascii {
+    font-size: 8px;
+    line-height: 8px;
+  }
+
+  .boton-idioma {
+    position: static;
+    display: block;
+    margin: 0 auto var(--linea);
   }
 
   .ventana {
     padding-left: 1ch;
     padding-right: 1ch;
+  }
+
+  .ventana-destacada .titulo-ventana {
+    margin-left: -1ch;
+    margin-right: -1ch;
+  }
+
+  .manual p {
+    margin-left: 0;
   }
 
   .resultado-precio {

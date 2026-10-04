@@ -7,14 +7,34 @@ prefers-reduced-motion.
 """
 
 import re
+import struct
 
+import build_og_image
 import pytest
 
 from tasador.config import RUTA_WEB
 
 CSS = (RUTA_WEB / "css" / "estilo.css").read_text(encoding="utf-8")
 HTML = (RUTA_WEB / "index.html").read_text(encoding="utf-8")
-PALETA = {"#060a06", "#33ff66", "#1f9d45", "#0f3d1c"}
+# Paleta VGA de 16 colores (D-039): ningún color fuera de ella
+PALETA = {
+    "#000000",
+    "#0000aa",
+    "#00aa00",
+    "#00aaaa",
+    "#aa0000",
+    "#aa00aa",
+    "#aa5500",
+    "#aaaaaa",
+    "#555555",
+    "#5555ff",
+    "#55ff55",
+    "#55ffff",
+    "#ff5555",
+    "#ff55ff",
+    "#ffff55",
+    "#ffffff",
+}
 FUENTES = (
     "WebPlus_IBM_VGA_9x16.woff",
     "IBMPlexMono-Regular.woff2",
@@ -30,7 +50,7 @@ def css_sin_comentarios() -> str:
 # Paleta y colores
 
 
-def test_solo_colores_de_la_paleta_aprobada():
+def test_solo_colores_de_la_paleta_vga():
     colores = set(re.findall(r"#[0-9a-fA-F]{3,8}\b", css_sin_comentarios()))
     assert {color.lower() for color in colores} <= PALETA
 
@@ -124,3 +144,45 @@ def test_metadatos_para_compartir():
     for propiedad in ("og:title", "og:description", "og:type", "og:url"):
         assert f'property="{propiedad}"' in HTML
     assert '<meta name="description"' in HTML
+
+
+# Imagen para compartir
+
+
+FIRMA_PNG = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+
+
+def dimensiones_png(ruta) -> tuple[int, int]:
+    """Ancho y alto leídos de la cabecera IHDR del PNG."""
+    cabecera = ruta.read_bytes()[:24]
+    assert cabecera[:8] == FIRMA_PNG
+    return struct.unpack(">II", cabecera[16:24])
+
+
+def test_imagen_para_compartir_existe_y_mide_1200x630():
+    assert dimensiones_png(RUTA_WEB / "og.png") == (1200, 630)
+    assert 'property="og:image" content="https://ml-vivienda-madrid-1.onrender.com/og.png"' in HTML
+    assert 'name="twitter:card" content="summary_large_image"' in HTML
+
+
+def test_imagen_para_compartir_al_dia_y_determinista(tmp_path):
+    for nombre in ("a.png", "b.png"):
+        build_og_image.construir_imagen(build_og_image.RUTA_FUENTE).save(
+            tmp_path / nombre, format="PNG", optimize=True
+        )
+    generada = (tmp_path / "a.png").read_bytes()
+    assert generada == (tmp_path / "b.png").read_bytes()
+    assert generada == (RUTA_WEB / "og.png").read_bytes()
+
+
+def test_logo_de_la_imagen_igual_que_el_de_la_web():
+    bloque = re.search(r'<pre class="logo-ascii" aria-hidden="true">(.*?)</pre>', HTML, re.DOTALL)
+    assert bloque is not None
+    assert tuple(bloque.group(1).splitlines()) == build_og_image.LOGO
+
+
+def test_imagen_usa_solo_la_paleta():
+    colores = set()
+    for nombre in ("NEGRO", "GRIS", "TEXTO", "AMARILLO", "VERDE", "CIAN"):
+        colores.add(getattr(build_og_image, nombre))
+    assert colores <= PALETA

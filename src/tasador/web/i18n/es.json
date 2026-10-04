@@ -1,5 +1,6 @@
 {
   "marca": "tasador-madrid",
+  "subtitulo": "Estimación orientativa del precio de venta de una vivienda en Madrid",
   "idioma": {
     "codigo": "ES",
     "boton": "[ EN ]",
@@ -29,7 +30,7 @@
   "formulario": {
     "titulo": "$ tasar --vivienda",
     "elegir": "-- elegir --",
-    "no_indicado": "-- no lo sé --",
+    "no_indicado": "no lo sé",
     "buscar": "escribe para buscar",
     "elige_distrito": "elige antes un distrito",
     "sin_coincidencias": "sin coincidencias",
@@ -85,10 +86,15 @@
   },
   "modelo": {
     "titulo": "sobre el modelo",
-    "que_es": "un CatBoostRegressor de 2.044 árboles entrenado con anuncios de viviendas en venta en Madrid publicados en Idealista en 2025. estima el precio a partir de superficie, distrito, barrio, tipo, planta y características del anuncio.",
-    "metricas": "sobre {viviendas} viviendas de test: MAE {mae} · RMSE {rmse} · R² {r2}.",
-    "limitaciones": "limitaciones: estima el precio de anuncio, no el de venta final; solo Madrid capital; datos de 2025; el error crece por encima de 1,49 M€.",
-    "autoria": "modelo de Ramiro Caruso y Ana Manzanares, con el análisis exploratorio de Ana. este servicio, de Ramiro Caruso."
+    "manual": "Manual de usuario",
+    "que_es_titulo": "QUÉ ES",
+    "que_es": "Un modelo de ==CatBoost== (gradient boosting sobre árboles de decisión) entrenado con ==anuncios de viviendas en venta en Madrid publicados en Idealista en 2025==. Combina {arboles} árboles de profundidad {profundidad} y usa {variables} variables: superficie, distrito, barrio, tipo de inmueble, planta, ascensor, exterior o interior, baños, habitaciones y {indicadores} indicadores extraídos del anuncio.",
+    "precision_titulo": "PRECISIÓN",
+    "precision": "Sobre {viviendas} viviendas de test que el modelo no vio al entrenar: ==MAE {mae}==, RMSE {rmse}, ==R² {r2}==. El error depende del precio: ==entre el {error_min} y el {error_max}== hasta {umbral} M€ y ==del {error_lujo}== por encima.",
+    "limitaciones_titulo": "LIMITACIONES",
+    "limitaciones": "Estima el ==precio de anuncio==, no el de venta final ni el valor de tasación. Solo cubre Madrid capital ({distritos} distritos y {barrios} barrios) y refleja el mercado de 2025.",
+    "autoria_titulo": "AUTORÍA",
+    "autoria": "Modelo de ==Ramiro Caruso y Ana Manzanares==; el análisis exploratorio de datos es de Ana. Este servicio web es de ==Ramiro Caruso==."
   },
   "pie": {
     "repositorio": "repositorio",

@@ -81,3 +81,22 @@ export function aplicarTraducciones(raiz = document) {
 export function etiqueta(bilingue) {
   return bilingue[idiomaActual];
 }
+
+// Escribe un texto con tramos ==resaltados== como elementos <mark>.
+// Crea nodos de texto, nunca HTML: el diccionario no puede inyectar marcado.
+export function escribirConResaltado(elemento, texto) {
+  const partes = texto.split("==");
+  elemento.replaceChildren();
+  for (let posicion = 0; posicion < partes.length; posicion += 1) {
+    if (partes[posicion] === "") {
+      continue;
+    }
+    if (posicion % 2 === 1) {
+      const resaltado = document.createElement("mark");
+      resaltado.textContent = partes[posicion];
+      elemento.append(resaltado);
+    } else {
+      elemento.append(document.createTextNode(partes[posicion]));
+    }
+  }
+}

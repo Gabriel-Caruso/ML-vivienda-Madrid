@@ -13,7 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
-| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG · D-039 paleta VGA · D-040 sobre el modelo · D-041 imagen para compartir |
 
 ---
 
@@ -341,9 +341,9 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Alternativa descartada:** VT323 (OFL 1.1), sin caracteres de caja.
 - **Incertidumbre:** se entiende que la cláusula ShareAlike solo afecta a modificaciones de la fuente, no a la web que la usa. No es asesoramiento legal.
 
-## D-033. Paleta
+## D-033. Paleta (sustituida por D-039)
 
-- **Estado:** aprobada (opción A, P1 clásico).
+- **Estado:** sustituida. Fue la paleta de la primera versión del tema, monocroma en verde; se cambió por la VGA de 16 colores (D-039) porque todo en verde fósforo cansaba la vista y no dejaba distinguir lo importante.
 - **Qué:** fondo `#060a06`, verde principal `#33ff66`, verde atenuado `#1f9d45`, verde tenue `#0f3d1c`. Contraste WCAG sobre el fondo: principal 14,8; atenuado 5,7 (válido para texto secundario); tenue 1,6, solo decorativo (árbol y rejilla).
 - **Errores:** vídeo inverso (texto en color de fondo sobre bloque verde principal) con prefijo `ERROR:`. **Foco:** contorno de 2 px en verde principal y vídeo inverso en los botones.
 
@@ -375,7 +375,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 ## D-037. Estética de terminal y lista "que no parezca hecha por una IA"
 
 - **Estado:** aprobada (requisitos de la fase 2). Implementada en el paso 3; repaso completo en el paso 4.
-- **Qué:** paleta A (D-033); IBM VGA 9x16 para marca, títulos, registro y barra de estado e IBM Plex Mono para el resto; paneles con borde de 1 px y título sobre el borde entre `┤ ├`, como en una interfaz de terminal; prompt `$`, cursor `█` parpadeante, casillas `[ ]` / `[x]`, selectores con `[v]`, botones `[ CALCULAR ]` en vídeo inverso al recibir foco o pulsarse, errores en vídeo inverso con `ERROR:`, aviso con `[!]`, barra de estado inferior en vídeo inverso, enlaces del pie como `~/github`.
+- **Qué:** paleta VGA (D-039); IBM VGA 9x16 para logo, títulos, registro y barra de estado e IBM Plex Mono para el resto; cabecera con el nombre en arte ASCII de bloques centrado; paneles con borde de 1 px y título sobre el borde entre `┤ ├`, como en una interfaz de terminal; prompt `$`, cursor `█` parpadeante, casillas `[ ]` / `[x]`, selectores con `[v]`, botones `[ CALCULAR ]` en vídeo inverso al recibir foco o pulsarse, errores en vídeo inverso rojo con `ERROR:`, aviso con `[!]`, barra de estado discreta (gris sobre negro, con el estado de la API en verde, amarillo o rojo además del texto), enlaces del pie centrados como `~/github`, separadores discontinuos en rojo oscuro y paneles destacados ("resultado" y "sobre el modelo") con barra de título amarilla sólida, al estilo de las ventanas de Norton Commander.
 - **Lista de comprobación (paso 0), con comprobación automática donde se puede (`tests/unit/test_web_estetica.py`):**
   1. `border-radius` siempre 0 (test).
   2. Sin `box-shadow`, `text-shadow` ni `drop-shadow` (test).
@@ -385,7 +385,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
   6. Sin cuadrícula de tres tarjetas de características.
   7. Sin píldoras ni badges: los estados son texto (`[!]`, `ERROR:`).
   8. Sin iconos de librerías ni emojis (tests de iconos, CDN y emojis).
-  9. Sin violeta, índigo ni azules: solo los cuatro colores de la paleta (test).
+  9. Sin violeta ni índigo: solo colores de la paleta VGA de 16 colores (test).
   10. Espaciado en `ch` y en múltiplos de la altura de línea, no la escala de Tailwind.
   11. Sin animaciones al pasar el ratón; la única animación es el parpadeo del cursor, que se desactiva con `prefers-reduced-motion` (tests).
   12. Textos breves en minúscula de terminal, sin lenguaje de marketing.
@@ -407,6 +407,30 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
   - **D, MAE por modelo:** puntos unidos por una línea; cuadrado relleno para validación cruzada y rombo hueco para test, con leyenda.
 - **Pantallas estrechas (< 480 px de gráfico):** etiquetas del eje del gráfico A en dos líneas, solo tres rótulos en el eje X del B, leyenda del D en dos filas y el nombre de cada modelo encima de su punto.
 - **Reglas del proyecto sobre la guía general de visualización:** la paleta es la monocroma aprobada (los colores los decide el responsable del proyecto) y las marcas tienen esquinas rectas; las series se distinguen por marcador y tipo de trazo, como piden las reglas de diseño.
+
+## D-039. Paleta VGA de 16 colores
+
+- **Estado:** aprobada en prueba (si no convence, la alternativa es Gruvbox oscuro, de 2012).
+- **Por qué se cambió:** con todo el texto en verde `#33ff66`, muy saturado, sobre casi negro, el ojo percibe un halo (parecía que las letras brillaban, aunque no hay ningún `text-shadow`) y nada destacaba: efecto muro.
+- **Referencias revisadas** (capturas de 2019 en la Wayback Machine, anteriores a las webs generadas por IA): int10h.org (Oldschool PC Font Pack), con la paleta VGA, un color por función, columna central y pie centrado; tilde.town, con arte ASCII enmarcado y título centrado; 16colo.rs, con texto gris y acentos de un solo color. En ninguna el texto principal es verde.
+- **Qué:** solo valores de la paleta VGA de IBM (1987), cada uno con una función: fondo `#000000`; texto `#aaaaaa`; lo que escribe el usuario y los valores `#ffffff`; títulos, resaltados y la estimación del usuario `#ffff55`; prompt, acentos y datos `#55ff55`; enlaces y la opción activa del desplegable `#55ffff`; errores `#ff5555`; secundario y bordes `#555555`; separadores `#aa0000`; árbol de fondo `#00aa00`; puntos del gráfico B `#00aaaa`. Un test garantiza que el CSS, el favicon y la imagen para compartir no usan ningún color fuera de la paleta.
+- **Accesibilidad:** nada se distingue solo por el color: los errores llevan `ERROR:`, el tramo del usuario la etiqueta `[tu tramo]`, el estado de la API su texto y las series de los gráficos su forma o trazo.
+- **Alternativas descartadas:** Gruvbox oscuro (más suave; queda como alternativa) y "fósforo + ámbar" (la más parecida al tema anterior).
+
+## D-040. "Sobre el modelo" como página de manual
+
+- **Estado:** aprobada (texto aprobado por el responsable del proyecto).
+- **Qué:** columna central de 76 caracteres con el texto justificado, cabecera `TASADOR(1) · Manual de usuario · TASADOR(1)` y apartados en mayúsculas (QUÉ ES, PRECISIÓN, LIMITACIONES, AUTORÍA), como una página de `man`. La información importante va resaltada (fondo amarillo, `<mark>`) en lugar de en negrita.
+- **Cifras sin copiar a mano:** los textos del diccionario llevan marcadores (`{mae}`, `{r2}`, `{error_min}`...) que se rellenan con el informe del modelo y el catálogo, con formato por idioma. Así el texto aprobado no puede quedar desactualizado respecto a los datos.
+- **Resaltado sin HTML en el diccionario:** los tramos `==así==` se convierten en elementos `<mark>` creando nodos uno a uno; el diccionario nunca se inserta como HTML.
+- **Partición silábica:** el texto justificado parte palabras con guion (`hyphens: auto`, idioma del documento), salvo dentro de los resaltados, que se leen enteros.
+
+## D-041. Imagen para compartir
+
+- **Estado:** aprobada.
+- **Qué:** `web/og.png`, de 1200 × 630, generada por `scripts/build_og_image.py` con la misma estética: marco, barra de título amarilla, el logo en bloques, el subtítulo y la URL del Static Site. Usa la fuente IBM VGA del proyecto con tamaños múltiplos de 16 px para que salga nítida. Metadatos `og:image` (con tamaño y texto alternativo) y tarjeta `summary_large_image`.
+- **Pillow:** el script usa Pillow, que ya está instalado como dependencia de matplotlib (a su vez, de catboost). No se añade al proyecto; si algún día dejara de llegar por esa vía, habría que declararlo en el grupo de desarrollo.
+- **Comprobado por tests:** dimensiones (leídas de la cabecera del PNG), determinismo, que el archivo versionado es el que genera el script, que el logo es idéntico al del HTML y que solo usa colores de la paleta.
 
 ---
 
