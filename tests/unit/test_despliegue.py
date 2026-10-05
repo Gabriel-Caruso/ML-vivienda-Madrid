@@ -69,3 +69,37 @@ def test_ci_en_cada_push_y_pull_request():
     ci = leer(RUTA_CI)
     assert "push:" in ci
     assert "pull_request:" in ci
+
+
+# Static Site (interfaz web)
+
+URL_API = "https://ml-vivienda-madrid.onrender.com"
+URL_WEB = "https://ml-vivienda-madrid-1.onrender.com"
+
+
+def test_static_site_publica_la_carpeta_de_la_web():
+    render = leer(RUTA_RENDER)
+    assert "runtime: static" in render
+    assert "staticPublishPath: src/tasador/web" in render
+    assert (RAIZ_PROYECTO / "src" / "tasador" / "web" / "index.html").is_file()
+
+
+def test_static_site_revalida_los_archivos():
+    assert re.search(r"- path: /\*\s+name: Cache-Control\s+value: no-cache", leer(RUTA_RENDER))
+
+
+def test_urls_cruzadas_entre_web_y_api():
+    render = leer(RUTA_RENDER)
+    assert re.search(rf"key: API_BASE_URL\s+value: {re.escape(URL_API)}\n", render)
+    assert re.search(rf"key: ALLOWED_ORIGINS\s+value: {re.escape(URL_WEB)}\n", render)
+
+
+def test_build_del_static_site_genera_el_mismo_formato_que_config_js():
+    """Con las variables vacías, el printf del build da exactamente el config.js versionado."""
+    render = leer(RUTA_RENDER)
+    plantilla = re.search(r"printf '([^']+)'", render).group(1)
+    assert '"$API_BASE_URL" "$PORTFOLIO_URL" > src/tasador/web/config.js' in render
+    # En el YAML, "\n" son dos caracteres que printf convierte en salto de línea
+    generado = plantilla.replace("\\n", "\n").replace("%s", "")
+    config = (RAIZ_PROYECTO / "src" / "tasador" / "web" / "config.js").read_text(encoding="utf-8")
+    assert generado == config

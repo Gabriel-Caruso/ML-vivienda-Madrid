@@ -1,7 +1,10 @@
-# Blueprint de Render: servicio web gratuito con la API del tasador.
-# Python sale de .python-version y uv se activa porque existe uv.lock en la raíz.
+# Blueprint de Render: API (Web Service) e interfaz web (Static Site).
+# Los dos servicios se crearon desde el panel con estos mismos valores; este
+# archivo es su configuración versionada (docs/DECISIONES.md, D-026 y D-028).
 # Referencia: https://render.com/docs/blueprint-spec
 services:
+  # API: FastAPI + modelo. Python sale de .python-version y uv se activa porque
+  # existe uv.lock en la raíz.
   - type: web
     name: tasador-madrid
     runtime: python
@@ -18,3 +21,25 @@ services:
     envVars:
       - key: UV_VERSION
         value: 0.12.23
+      # Orígenes que pueden llamar a la API desde el navegador (CORS): el Static Site
+      - key: ALLOWED_ORIGINS
+        value: https://ml-vivienda-madrid-1.onrender.com
+
+  # Interfaz web: los archivos de src/tasador/web tal cual. El build solo escribe
+  # config.js con la URL de la API (y la del portfolio, si existe).
+  - type: web
+    name: tasador-madrid-web
+    runtime: static
+    buildCommand: >-
+      printf 'window.TASADOR_CONFIG = { apiBaseUrl: "%s", portfolioUrl: "%s" };\n'
+      "$API_BASE_URL" "$PORTFOLIO_URL" > src/tasador/web/config.js
+    staticPublishPath: src/tasador/web
+    # El navegador revalida cada archivo en cada carga (ETag): tras un despliegue
+    # nunca se queda con JavaScript o datos antiguos (D-036)
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    envVars:
+      - key: API_BASE_URL
+        value: https://ml-vivienda-madrid.onrender.com
