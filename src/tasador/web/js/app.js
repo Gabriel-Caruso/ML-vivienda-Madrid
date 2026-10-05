@@ -1,7 +1,7 @@
 // Punto de entrada de la web: idioma, catálogo, registro de arranque, formulario y resultado.
 
 import { ErrorDeRed, predecir, urlPortfolio } from "./api.js";
-import { iniciarArbol } from "./arbol.js";
+import { activarHolograma, iniciarArbol, redibujarHolograma } from "./arbol.js";
 import {
   alCambiarEstado,
   anotar,
@@ -117,6 +117,7 @@ function traducirPagina() {
   redibujarResultado();
   escribirTextosModelo();
   redibujarGraficos();
+  redibujarHolograma();
   actualizarBarraEstado();
   redibujarErrores();
 }
@@ -151,6 +152,7 @@ async function alEnviar(evento) {
       return;
     }
     anotar("arranque.calculando");
+    activarHolograma();
     const respuesta = await predecir(peticion);
     if (respuesta.ok) {
       anotar("arranque.recibido");

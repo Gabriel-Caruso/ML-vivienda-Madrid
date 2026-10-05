@@ -15,7 +15,7 @@ GRUPO_LEGAL = "legal_and_listing"
 
 ETIQUETAS_GRUPO = {
     GRUPO_VIVIENDA: Etiqueta(es="Características de la vivienda", en="Property features"),
-    GRUPO_LEGAL: Etiqueta(es="Situación legal y del anuncio", en="Legal and listing status"),
+    GRUPO_LEGAL: Etiqueta(es="Situación legal", en="Legal status"),
 }
 
 
@@ -118,7 +118,7 @@ OPCIONES_BINARIAS = (
         Etiqueta(es="Cerca de un parque", en="Near a park"),
     ),
     OpcionBinaria("loft", ("flag_loft",), GRUPO_VIVIENDA, Etiqueta(es="Loft", en="Loft")),
-    # Situación legal y del anuncio
+    # Situación legal
     OpcionBinaria(
         "squatted",
         ("flag_okupada",),

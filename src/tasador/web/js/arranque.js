@@ -20,19 +20,44 @@ export function iniciarRegistro(elementoLista) {
   lista = elementoLista;
 }
 
+// La línea "Modelo cargado. Listo." lleva el único cursor parpadeante de la página
+const CLAVE_LISTO = "arranque.listo";
+const CLASE_LISTO = "linea-lista";
+
+function dibujarLinea(linea, esUltimaLista) {
+  const elemento = document.createElement("li");
+  elemento.textContent = t(linea.clave, linea.parametros);
+  if (esUltimaLista) {
+    elemento.classList.add(CLASE_LISTO);
+  }
+  lista.append(elemento);
+}
+
+// Índice de la última línea "listo" (solo esa parpadea si la API se reconecta)
+function indiceUltimaLista() {
+  let indice = -1;
+  for (let posicion = 0; posicion < lineas.length; posicion += 1) {
+    if (lineas[posicion].clave === CLAVE_LISTO) {
+      indice = posicion;
+    }
+  }
+  return indice;
+}
+
 export function anotar(clave, parametros = {}) {
   lineas.push({ clave, parametros });
-  const elemento = document.createElement("li");
-  elemento.textContent = t(clave, parametros);
-  lista.append(elemento);
+  if (clave === CLAVE_LISTO) {
+    redibujarRegistro();
+  } else {
+    dibujarLinea(lineas[lineas.length - 1], false);
+  }
 }
 
 export function redibujarRegistro() {
   lista.replaceChildren();
-  for (const linea of lineas) {
-    const elemento = document.createElement("li");
-    elemento.textContent = t(linea.clave, linea.parametros);
-    lista.append(elemento);
+  const ultimaLista = indiceUltimaLista();
+  for (let posicion = 0; posicion < lineas.length; posicion += 1) {
+    dibujarLinea(lineas[posicion], posicion === ultimaLista);
   }
 }
 

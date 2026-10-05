@@ -2,8 +2,8 @@
    Cada color tiene una función: el texto es gris, los títulos amarillos, los
    acentos verdes, los enlaces cian y los errores rojos.
    Reglas del proyecto: esquinas rectas, sin sombras, sin degradados, sin
-   desenfoques, sin animaciones decorativas. Solo el cursor parpadea, y deja de
-   hacerlo con prefers-reduced-motion. */
+   desenfoques, sin animaciones decorativas. Solo parpadea el cursor de la línea
+   "Modelo cargado. Listo." del registro, y deja de hacerlo con prefers-reduced-motion. */
 
 @font-face {
   font-family: "IBM VGA";
@@ -129,7 +129,7 @@ mark {
   outline-offset: 2px;
 }
 
-/* --- Fondo animado: árbol real del modelo ------------------------------- */
+/* --- Fondo: holograma CRT del árbol real del modelo --------------------- */
 
 .fondo-arbol {
   position: fixed;
@@ -138,23 +138,67 @@ mark {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.35;
 }
 
-.fondo-arbol .rama {
-  stroke: var(--verde-oscuro);
+.holo-rama {
+  stroke: var(--cian-oscuro);
   stroke-width: 1;
-  fill: none;
 }
 
-.fondo-arbol .rama-recorrida {
-  stroke: var(--verde);
-}
-
-.fondo-arbol .corte {
-  fill: var(--verde-oscuro);
+.holo-corte,
+.holo-texto {
+  fill: var(--cian-oscuro);
   font-family: var(--fuente-pixel);
   font-size: 16px;
+}
+
+/* Al calcular: los niveles encendidos en cian; el que se está procesando, en blanco */
+.holo-nivel.activo {
+  opacity: 1;
+}
+
+.holo-nivel.activo .holo-rama {
+  stroke: var(--cian);
+}
+
+.holo-nivel.activo .holo-corte {
+  fill: var(--cian);
+}
+
+.holo-nivel.caliente .holo-rama {
+  stroke: var(--blanco);
+}
+
+.holo-fantasma line {
+  stroke: var(--cian-oscuro);
+  stroke-width: 1;
+  opacity: 0.12;
+}
+
+.holo-proyector ellipse,
+.holo-proyector line {
+  stroke: var(--cian-oscuro);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  fill: none;
+  opacity: 0.5;
+}
+
+.holo-barrido {
+  stroke: var(--blanco);
+  stroke-width: 2;
+}
+
+.holo-salida {
+  fill: var(--amarillo);
+  font-family: var(--fuente-pixel);
+  font-size: 16px;
+}
+
+/* Líneas de barrido de monitor CRT sobre todo el holograma */
+.holo-linea-crt {
+  fill: var(--fondo);
+  opacity: 0.6;
 }
 
 /* --- Cabecera: arte ASCII centrado -------------------------------------- */
@@ -184,11 +228,6 @@ mark {
 
 .prompt {
   color: var(--verde);
-}
-
-.cursor {
-  color: var(--verde);
-  animation: parpadeo 1s steps(1) infinite;
 }
 
 @keyframes parpadeo {
@@ -296,7 +335,8 @@ mark {
   color: var(--blanco);
 }
 
-.registro li:last-child::after {
+/* Único parpadeo de la página: el cursor tras "Modelo cargado. Listo." */
+.registro .linea-lista::after {
   content: "█";
   margin-left: 1ch;
   color: var(--verde);
@@ -902,8 +942,7 @@ input[type="checkbox"]:focus-visible {
 /* --- Movimiento reducido: sin parpadeo ni animación del fondo ----------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .cursor,
-  .registro li:last-child::after {
+  .registro .linea-lista::after {
     animation: none;
   }
 }

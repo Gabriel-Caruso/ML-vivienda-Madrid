@@ -13,7 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
-| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG · D-039 paleta VGA · D-040 sobre el modelo · D-041 imagen para compartir · D-042 usabilidad del formulario |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG · D-039 paleta VGA · D-040 sobre el modelo · D-041 imagen para compartir · D-042 usabilidad del formulario · D-043 textos y parpadeo · D-044 holograma CRT |
 
 ---
 
@@ -378,7 +378,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 ## D-037. Estética de terminal y lista "que no parezca hecha por una IA"
 
 - **Estado:** aprobada (requisitos de la fase 2). Implementada en el paso 3; repaso completo en el paso 4.
-- **Qué:** paleta VGA (D-039); IBM VGA 9x16 para logo, títulos, registro y barra de estado e IBM Plex Mono para el resto; cabecera con el nombre en arte ASCII de bloques centrado; paneles con borde de 1 px y título sobre el borde entre `┤ ├`, como en una interfaz de terminal; prompt `$`, cursor `█` parpadeante, casillas `[ ]` / `[x]`, selectores con `[v]`, botones `[ CALCULAR ]` en vídeo inverso al recibir foco o pulsarse, errores en vídeo inverso rojo con `ERROR:`, aviso con `[!]`, barra de estado discreta (gris sobre negro, con el estado de la API en verde, amarillo o rojo además del texto), enlaces del pie centrados como `~/github`, separadores discontinuos en rojo oscuro y paneles destacados ("resultado" y "sobre el modelo") con barra de título amarilla sólida, al estilo de las ventanas de Norton Commander.
+- **Qué:** paleta VGA (D-039); IBM VGA 9x16 para logo, títulos, registro y barra de estado e IBM Plex Mono para el resto; cabecera con el nombre en arte ASCII de bloques centrado; paneles con borde de 1 px y título sobre el borde entre `┤ ├`, como en una interfaz de terminal; prompt `$`, cursor `█` parpadeante solo tras "Modelo cargado. Listo." (D-043), casillas `[ ]` / `[x]`, selectores con `[v]`, botones `[ CALCULAR ]` en vídeo inverso al recibir foco o pulsarse, errores en vídeo inverso rojo con `ERROR:`, aviso con `[!]`, barra de estado discreta (gris sobre negro, con el estado de la API en verde, amarillo o rojo además del texto), enlaces del pie centrados como `~/github`, separadores discontinuos en rojo oscuro y paneles destacados ("resultado" y "sobre el modelo") con barra de título amarilla sólida, al estilo de las ventanas de Norton Commander.
 - **Lista de comprobación (paso 0), con comprobación automática donde se puede (`tests/unit/test_web_estetica.py`):**
   1. `border-radius` siempre 0 (test).
   2. Sin `box-shadow`, `text-shadow` ni `drop-shadow` (test).
@@ -390,7 +390,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
   8. Sin iconos de librerías ni emojis (tests de iconos, CDN y emojis).
   9. Sin violeta ni índigo: solo colores de la paleta VGA de 16 colores (test).
   10. Espaciado en `ch` y en múltiplos de la altura de línea, no la escala de Tailwind.
-  11. Sin animaciones al pasar el ratón; la única animación es el parpadeo del cursor, que se desactiva con `prefers-reduced-motion` (tests).
+  11. Sin animaciones al pasar el ratón; la única animación CSS es el parpadeo del cursor de la línea "Modelo cargado. Listo.", que se desactiva con `prefers-reduced-motion` (tests). El barrido del holograma (D-044) solo ocurre al calcular, como respuesta a una acción del usuario.
   12. Textos breves en minúscula de terminal, sin lenguaje de marketing.
   13. Botones como comandos entre corchetes.
   14. Separadores de línea discontinua de 1 px, sin `<hr>` por defecto.
@@ -443,8 +443,31 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Errores que se limpian:** el mensaje de error de un campo desaparece en cuanto se modifica ese campo (escribir, elegir una opción, marcar "no lo sé" o una casilla), sin esperar al siguiente envío. Los errores que siguen vigentes se conservan y se redibujan al cambiar de idioma.
 - **Verificado en Chrome (local, web y API en orígenes distintos):** tras el error, el foco va al distrito sin abrir la lista; al escribir se abre y desaparece solo el error del distrito.
 
+## D-043. Mayúsculas, textos y un único parpadeo
+
+- **Estado:** aprobada (petición del responsable del proyecto tras la fase 2).
+- **Mayúsculas:** todos los textos de la interfaz empiezan en mayúscula, también después de un punto, de `> ` en el registro y de `ERROR: `; "api" se escribe "API". Se mantienen en minúscula a propósito la marca (`tasador-madrid`), el comando `$ tasar --vivienda`, los códigos de idioma y botón y las rutas del pie (`~/github`). Los textos emergentes que empiezan por un dato (`35k-250k: error relativo 16,7 %`) siguen en minúscula tras los dos puntos. Un test recorre los dos diccionarios.
+- **Un único parpadeo:** solo parpadea el cursor tras la línea "Modelo cargado. Listo." del registro (la última, si la API se reconecta). Se quitan el cursor del subtítulo y el de la última línea del registro: dos parpadeos a la vez mareaban.
+- **"Situación legal"** sustituye a "Situación legal y del anuncio" (en inglés, "Legal status"). Solo cambia la etiqueta del dominio: la clave del grupo (`legal_and_listing`) y las casillas no cambian, así que el contrato de la API es el mismo.
+- **LIMITACIONES** (texto del responsable del proyecto): "Solo cubre Madrid capital (21 distritos y 139 barrios) y refleja el mercado de 2025. La base de datos era limitada en cuanto a columnas. Se extrajo toda la información posible con las mejores prácticas. Este es el modelo más justo que podemos ofrecer con dichos datos." Las cifras siguen saliendo del catálogo. La aclaración de que estima el precio de anuncio queda en el README.
+- **Gráfico C:** la línea de lectura ya no explica la agrupación ("Porcentaje de uso de cada variable en el modelo final."); la barra "Otras variables..." se explica por sí misma.
+
+## D-044. Fondo: holograma CRT del modelo
+
+- **Estado:** propuesta con libertad creativa del responsable del proyecto; pendiente de sus indicaciones sobre el diseño.
+- **Qué (`js/arbol.js`):** el árbol 0 real (D-030) dibujado como un holograma de monitor CRT, solo con colores de la paleta VGA y sin brillos, desenfoques ni degradados (D-037):
+  - un proyector en la base (elipses discontinuas) y un cono de luz hasta los extremos de la fila de hojas;
+  - dos copias desplazadas de los primeros niveles detrás del árbol, que representan el conjunto de 2.044 árboles;
+  - líneas de barrido CRT por encima (un patrón SVG de una línea negra cada 3 px);
+  - una cabecera "CATBOOST · ÁRBOL 0 DE 2.044 · PROFUNDIDAD 9" y, a la izquierda, el corte real de cada nivel.
+- **Al calcular:** justo cuando la web envía la petición, los niveles se iluminan de arriba abajo cada 130 ms (el que se procesa, en blanco y con una línea de barrido; los ya procesados, en cian). Al final aparece "-> PREDICCIÓN" en amarillo bajo la columna de cortes, se mantiene 1,5 s y el árbol se apaga nivel a nivel.
+- **En reposo:** quieto. Sustituye al recorrido animado de una vivienda, que estaba siempre en movimiento.
+- **Honestidad:** se ilumina el árbol entero, nivel a nivel, no un camino concreto: el navegador no puede calcular por qué rama iría la vivienda del usuario (los cortes por CTR solo los evalúa el modelo). Los recorridos de `arbol.json` ya no se dibujan; se conservan porque `export_tree.py` los usa para comprobar el orden de los niveles.
+- **Movimiento reducido:** sin barrido; el árbol se enciende entero y se apaga a los 1,5 s.
+- **Verificado en Chrome:** el barrido, el estado iluminado y la salida, en español e inglés, sin errores en consola.
+
 ---
 
 ## Pendiente de confirmar
 
-- Nada pendiente al cierre de la fase 2.
+- Diseño del holograma CRT: el responsable del proyecto dará indicaciones (D-044).

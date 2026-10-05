@@ -871,8 +871,8 @@
     {
       "key": "legal_and_listing",
       "label": {
-        "es": "Situación legal y del anuncio",
-        "en": "Legal and listing status"
+        "es": "Situación legal",
+        "en": "Legal status"
       },
       "options": [
         {

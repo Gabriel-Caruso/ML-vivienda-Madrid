@@ -122,3 +122,61 @@ def test_errores_de_un_campo_se_quitan_al_modificarlo():
     assert 'addEventListener("input", alModificarCampo)' in codigo
     assert 'addEventListener("change", alModificarCampo)' in codigo
     assert "function quitarErroresDeCampo(nombre)" in codigo
+
+
+# Textos y parpadeo (ajustes tras la fase 2)
+
+# Textos que son marcas, comandos o rutas y van en minúscula a propósito
+CLAVES_EN_MINUSCULA = {
+    "marca",
+    "idioma.codigo",
+    "idioma.boton",
+    "formulario.titulo",
+    "pie.repositorio",
+    "pie.portfolio",
+}
+
+
+def textos_planos(nodo, ruta=""):
+    for clave, valor in nodo.items():
+        completa = f"{ruta}.{clave}" if ruta else clave
+        if isinstance(valor, dict):
+            yield from textos_planos(valor, completa)
+        else:
+            yield completa, valor
+
+
+@pytest.mark.parametrize("idioma", ["es", "en"])
+def test_textos_empiezan_en_mayuscula(idioma):
+    diccionario = json.loads((RUTA_WEB / "i18n" / f"{idioma}.json").read_text(encoding="utf-8"))
+    for clave, texto in textos_planos(diccionario):
+        # Los que empiezan por un dato ("{tramo}: error relativo...") siguen tras los dos puntos
+        if clave in CLAVES_EN_MINUSCULA or texto.startswith("{"):
+            continue
+        letras = re.sub(r"^(> |ERROR: |-- |\[ ?)", "", texto)
+        primera = re.search(r"[A-Za-zÁÉÍÓÚÑáéíóúñ]", letras)
+        assert primera is None or not primera.group(0).islower(), f"{idioma}: {clave}"
+
+
+def test_unico_parpadeo_es_el_de_la_linea_lista():
+    css = (RUTA_WEB / "css" / "estilo.css").read_text(encoding="utf-8")
+    sin_comentarios = re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL)
+    bloques = re.findall(r"([^{}]+)\{[^{}]*animation:\s*parpadeo", sin_comentarios)
+    assert [bloque.strip() for bloque in bloques] == [".registro .linea-lista::after"]
+    assert 'class="cursor"' not in (RUTA_WEB / "index.html").read_text(encoding="utf-8")
+
+
+def test_grupo_legal_se_llama_situacion_legal():
+    grupos = {}
+    for grupo in construir_metadata().option_groups:
+        grupos[grupo.key] = grupo.label
+    assert grupos["legal_and_listing"].es == "Situación legal"
+    assert grupos["legal_and_listing"].en == "Legal status"
+
+
+def test_holograma_traducido_y_conectado_al_calculo():
+    for idioma in ("es", "en"):
+        diccionario = json.loads((RUTA_WEB / "i18n" / f"{idioma}.json").read_text(encoding="utf-8"))
+        assert set(diccionario["holograma"]) == {"cabecera", "salida"}
+    app = (RUTA_WEB / "js" / "app.js").read_text(encoding="utf-8")
+    assert "activarHolograma();" in app

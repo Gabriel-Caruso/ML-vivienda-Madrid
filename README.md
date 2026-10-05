@@ -67,7 +67,7 @@ Vive en `src/tasador/web/` como archivos estáticos: `index.html`, `css/`, `js/`
 - **Arranque:** al abrir la página llama a `/api/v1/health` para que la API despierte mientras se rellena el formulario. El formulario funciona desde el primer momento con el catálogo estático (`datos/catalogo.json`, idéntico a `/api/v1/metadata`).
 - **Resultado:** precio redondeado a miles, margen y horquilla, y dos gráficos (error relativo por tramo de precio, y precio real frente a predicho en test) con la estimación marcada.
 - **Sobre el modelo:** texto con las cifras reales del informe del modelo, importancia de variables y MAE de cada paso del modelado.
-- **Fondo:** el árbol 0 real del modelo, con los cortes de cada nivel y el recorrido de una vivienda. Sin animación si el sistema pide movimiento reducido.
+- **Fondo:** un "holograma CRT" del árbol 0 real del modelo, con los cortes de cada nivel. Quieto en reposo; al calcular se ilumina de arriba abajo hasta la salida "-> PREDICCIÓN". Sin barrido si el sistema pide movimiento reducido.
 - **Sin terceros:** sin analítica, cookies ni peticiones externas; las fuentes están alojadas en el proyecto con sus licencias.
 
 La URL de la API se lee de `config.js`. En el repositorio está vacía (mismo origen, como en local) y el Static Site de Render la escribe en su build a partir de la variable `API_BASE_URL`.
@@ -97,7 +97,7 @@ Devuelve todo lo necesario para construir el formulario, con etiquetas en españ
 
 - campos, con su obligatoriedad y su rango;
 - distritos con sus barrios, tipos de inmueble, ascensor, exterior/interior y plantas;
-- los dos grupos de "más opciones": características de la vivienda, y situación legal y del anuncio.
+- los dos grupos de "más opciones": características de la vivienda, y situación legal.
 
 Ejemplo de un distrito:
 
