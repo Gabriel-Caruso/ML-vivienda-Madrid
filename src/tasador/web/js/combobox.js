@@ -36,7 +36,9 @@ export class Combobox {
 
     this.entrada.addEventListener("input", this.alEscribir.bind(this));
     this.entrada.addEventListener("keydown", this.alPulsarTecla.bind(this));
-    this.entrada.addEventListener("focus", this.alEnfocar.bind(this));
+    // La lista se abre al escribir, al hacer clic o con la flecha abajo, no solo por
+    // recibir el foco: así, cuando un error mueve el foco aquí, la lista no tapa el mensaje.
+    this.entrada.addEventListener("click", this.alPulsarEntrada.bind(this));
     this.entrada.addEventListener("blur", this.alSalir.bind(this));
     this.lista.addEventListener("mousedown", this.alPulsarRaton.bind(this));
   }
@@ -151,8 +153,10 @@ export class Combobox {
     this.abrir();
   }
 
-  alEnfocar() {
-    this.abrir();
+  alPulsarEntrada() {
+    if (this.lista.hidden) {
+      this.abrir();
+    }
   }
 
   alSalir() {

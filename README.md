@@ -2,7 +2,10 @@
 
 Servicio web que estima el precio de venta de una vivienda en Madrid a partir de sus características. Devuelve un precio estimado y una horquilla basada en el error real del modelo en cada tramo de precio.
 
-Es una API REST hecha con FastAPI que sirve un modelo CatBoost ya entrenado. La interfaz web, bilingüe en español e inglés, llegará en una segunda fase servida por la propia aplicación.
+Tiene dos partes: una API REST hecha con FastAPI que sirve un modelo CatBoost ya entrenado, y una interfaz web bilingüe (español e inglés) con estética de terminal, hecha con HTML, CSS y JavaScript sin dependencias ni paso de build.
+
+- **Web:** https://ml-vivienda-madrid-1.onrender.com
+- **API:** https://ml-vivienda-madrid.onrender.com (documentación en `/docs`)
 
 > No es una tasación oficial. Es una estimación orientativa a partir de anuncios publicados.
 
@@ -46,7 +49,7 @@ uv sync
 uv run uvicorn --factory tasador.main:create_app --reload
 ```
 
-La API queda en `http://127.0.0.1:8000` y la documentación interactiva (Swagger) en `http://127.0.0.1:8000/docs`.
+La web queda en `http://127.0.0.1:8000`, la API en `http://127.0.0.1:8000/api/v1/` y la documentación interactiva (Swagger) en `http://127.0.0.1:8000/docs`. En local la propia app sirve la web, así que basta un comando.
 
 Comprobaciones de calidad, las mismas que ejecuta la integración continua:
 
@@ -55,6 +58,19 @@ uv run ruff format --check .
 uv run ruff check .
 uv run pytest
 ```
+
+## Interfaz web
+
+Vive en `src/tasador/web/` como archivos estáticos: `index.html`, `css/`, `js/` (módulos ES), `i18n/` (diccionarios `es.json` y `en.json`), `datos/` (JSON precalculados), `fuentes/` y `config.js`.
+
+- **Formulario:** distrito y barrio como desplegables con búsqueda (el barrio solo ofrece los del distrito elegido), "no lo sé" en habitaciones y baños, planta, ascensor y localización ocultos en casas y chalets, y "más opciones" con las casillas de características y situación legal. Valida en el navegador con las mismas reglas y códigos de error que la API.
+- **Arranque:** al abrir la página llama a `/api/v1/health` para que la API despierte mientras se rellena el formulario. El formulario funciona desde el primer momento con el catálogo estático (`datos/catalogo.json`, idéntico a `/api/v1/metadata`).
+- **Resultado:** precio redondeado a miles, margen y horquilla, y dos gráficos (error relativo por tramo de precio, y precio real frente a predicho en test) con la estimación marcada.
+- **Sobre el modelo:** texto con las cifras reales del informe del modelo, importancia de variables y MAE de cada paso del modelado.
+- **Fondo:** el árbol 0 real del modelo, con los cortes de cada nivel y el recorrido de una vivienda. Sin animación si el sistema pide movimiento reducido.
+- **Sin terceros:** sin analítica, cookies ni peticiones externas; las fuentes están alojadas en el proyecto con sus licencias.
+
+La URL de la API se lee de `config.js`. En el repositorio está vacía (mismo origen, como en local) y el Static Site de Render la escribe en su build a partir de la variable `API_BASE_URL`.
 
 ## Endpoints
 
@@ -167,14 +183,33 @@ Los errores se devuelven con códigos estables, no con frases, para que la inter
 
 ## Despliegue
 
-El servicio se despliega en [Render](https://render.com) con el blueprint `render.yaml`:
+Se despliega en [Render](https://render.com) como dos servicios gratuitos. `render.yaml` recoge su configuración; en el panel se introdujeron los mismos valores.
 
-- **Plan:** gratuito, en la región de Fráncfort.
-- **Build y arranque:** `uv sync --locked --no-dev` y `uvicorn --factory tasador.main:create_app`.
-- **Health check:** en `/api/v1/health`.
-- **Despliegue automático:** solo cuando la integración continua de GitHub pasa.
+**Web Service (API)**
 
-**Arranque en frío:** en el plan gratuito, Render detiene el servicio tras 15 minutos sin tráfico. La primera petición después de ese tiempo puede tardar alrededor de un minuto mientras el servicio arranca y carga el modelo. Las siguientes responden con normalidad.
+| Ajuste | Valor |
+|---|---|
+| Runtime / plan / región | Python 3 / Free / Frankfurt |
+| Build Command | `uv sync --locked --no-dev` |
+| Start Command | `uv run --no-sync uvicorn --factory tasador.main:create_app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/api/v1/health` |
+| Auto-Deploy | After CI Checks Pass |
+| `UV_VERSION` | `0.12.23` |
+| `ALLOWED_ORIGINS` | `https://ml-vivienda-madrid-1.onrender.com` (orígenes que pueden llamar a la API desde el navegador, separados por comas) |
+
+**Static Site (web)**
+
+| Ajuste | Valor |
+|---|---|
+| Publish Directory | `src/tasador/web` |
+| Build Command | `printf 'window.TASADOR_CONFIG = { apiBaseUrl: "%s", portfolioUrl: "%s" };\n' "$API_BASE_URL" "$PORTFOLIO_URL" > src/tasador/web/config.js` |
+| `API_BASE_URL` | `https://ml-vivienda-madrid.onrender.com` (sin barra final) |
+| `PORTFOLIO_URL` | opcional; mientras esté vacía, el enlace al portfolio no aparece |
+| Header | ruta `/*`, `Cache-Control: no-cache`, para que el navegador no use archivos antiguos tras un despliegue |
+
+Python sale de `.python-version` y Render activa uv al encontrar `uv.lock`.
+
+**Arranque en frío:** en el plan gratuito, Render detiene la API tras 15 minutos sin tráfico. La primera petición después de ese tiempo puede tardar alrededor de un minuto mientras el servicio arranca y carga el modelo. La web lo indica en su registro de arranque y deja en cola la estimación hasta que la API responde.
 
 ## Estructura
 
@@ -182,21 +217,28 @@ El servicio se despliega en [Render](https://render.com) con el blueprint `rende
 src/tasador/
 ├── main.py              # create_app(): rutas, errores y carga del modelo en el lifespan
 ├── config.py            # rutas y tramos de la horquilla
-├── api/                 # rutas HTTP (versionadas en /api/v1) y traducción de errores
+├── api/                 # rutas HTTP (versionadas en /api/v1), web estática y traducción de errores
 ├── schemas/             # contratos Pydantic de entrada y salida
 ├── services/            # petición -> fila del modelo -> predicción; horquilla; metadata
-└── domain/              # catálogo, reglas del preprocesado, rangos, opciones y etiquetas
-scripts/                 # generación del catálogo y de los fixtures, verificación del modelo
+├── domain/              # catálogo, reglas del preprocesado, rangos, opciones y etiquetas
+└── web/                 # interfaz web estática (HTML, CSS, JS, i18n, datos, fuentes)
+scripts/                 # generación de catálogos, fixtures, datos de gráficos, árbol e imagen
 tests/                   # tests unitarios, de integración y de referencia
 docs/DECISIONES.md       # registro de decisiones técnicas
 ```
 
-El catálogo (`src/tasador/domain/catalogo.json`) y los fixtures de test (`tests/fixtures/`) están versionados. Solo hace falta regenerarlos si cambian los datos. Para ello se copian `train.csv` y `test.csv` de `src/data_sample/` del repositorio de entrenamiento a `data/` (excluida de git) y se ejecuta:
+Los datos generados están versionados y solo hace falta regenerarlos si cambian los datos o el dominio. Todos los scripts son deterministas y hay tests que comprueban que los archivos versionados coinciden con lo que generan.
 
-```bash
-uv run python scripts/build_catalog.py
-uv run python scripts/build_fixtures.py
-```
+| Script | Genera | Necesita `data/` |
+|---|---|---|
+| `build_catalog.py` | `src/tasador/domain/catalogo.json` | sí |
+| `build_fixtures.py` | `tests/fixtures/filas_referencia.json` | sí |
+| `build_model_report.py` | `web/datos/informe_modelo.json` (métricas y gráficos) | sí |
+| `build_web_catalog.py` | `web/datos/catalogo.json` | no |
+| `export_tree.py` | `web/datos/arbol.json` (árbol del fondo) | no |
+| `build_og_image.py` | `web/og.png` (imagen para compartir) | no |
+
+Los que necesitan datos usan `train.csv` y `test.csv` de `src/data_sample/` del repositorio de entrenamiento, copiados en `data/` (excluida de git). Se ejecutan con `uv run python scripts/<script>`.
 
 Un test de referencia comprueba que, para 20 viviendas reales, la API reproduce exactamente la predicción que da el modelo sobre la fila procesada en el notebook original.
 
@@ -210,7 +252,9 @@ Un test de referencia comprueba que, para 20 viviendas reales, la API reproduce 
 
 ## Autoría
 
-Ramiro Caruso y Ana Manzanares.
+Modelo de Ramiro Caruso y Ana Manzanares.
 
 - **Ana Manzanares:** análisis exploratorio de datos (EDA).
-- **Ramiro Caruso:** preprocesado, modelado y optimización.
+- **Ramiro Caruso:** preprocesado, modelado y optimización, y este servicio web.
+
+Fuentes: [IBM VGA 9x16](https://int10h.org/oldschool-pc-fonts/) (VileR, CC BY-SA 4.0) e [IBM Plex Mono](https://github.com/IBM/plex) (SIL OFL 1.1).

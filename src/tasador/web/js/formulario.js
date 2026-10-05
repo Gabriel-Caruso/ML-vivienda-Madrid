@@ -11,6 +11,8 @@ let catalogo = null;
 let comboDistrito = null;
 let comboBarrio = null;
 const casillas = [];
+// Errores mostrados ahora mismo; se redibujan al cambiar de idioma
+let erroresVigentes = [];
 
 function elemento(id) {
   return document.getElementById(id);
@@ -79,6 +81,7 @@ function opcionesDeBarrio() {
 }
 
 function alCambiarDistrito() {
+  quitarErroresDeCampo("district");
   comboBarrio.establecerOpciones(opcionesDeBarrio());
   comboBarrio.habilitar(comboDistrito.valor() !== "");
   actualizarTextosCombos();
@@ -127,7 +130,9 @@ function construirGrupos() {
 export function construirFormulario(datosCatalogo) {
   catalogo = datosCatalogo;
   comboDistrito = new Combobox(elemento("combobox-district"), "district", alCambiarDistrito);
-  comboBarrio = new Combobox(elemento("combobox-neighbourhood"), "neighbourhood", function () {});
+  comboBarrio = new Combobox(elemento("combobox-neighbourhood"), "neighbourhood", function () {
+    quitarErroresDeCampo("neighbourhood");
+  });
   comboBarrio.habilitar(false);
   elemento("campo-property_type").addEventListener("change", alCambiarTipo);
   for (const nombre of CAMPOS_DESCONOCIBLES) {
@@ -142,6 +147,8 @@ export function construirFormulario(datosCatalogo) {
   }
   construirGrupos();
   traducirFormulario();
+  elemento("formulario").addEventListener("input", alModificarCampo);
+  elemento("formulario").addEventListener("change", alModificarCampo);
 }
 
 // --- Textos según el idioma ----------------------------------------------
@@ -276,6 +283,11 @@ export function leerPeticion() {
 // --- Errores -------------------------------------------------------------
 
 export function limpiarErrores() {
+  erroresVigentes = [];
+  borrarErroresMostrados();
+}
+
+function borrarErroresMostrados() {
   const resumen = elemento("errores-formulario");
   resumen.hidden = true;
   resumen.replaceChildren();
@@ -295,7 +307,11 @@ function textoError(error) {
 // Muestra errores con códigos estables (del cliente o de la API) junto a su campo.
 // Los que no tienen campo conocido van al resumen del formulario.
 export function mostrarErrores(errores, enfocar = true) {
-  limpiarErrores();
+  erroresVigentes = errores;
+  borrarErroresMostrados();
+  if (errores.length === 0) {
+    return;
+  }
   const resumen = elemento("errores-formulario");
   const lineasResumen = [];
   let hayErroresDeCampo = false;
@@ -328,5 +344,46 @@ export function mostrarErrores(errores, enfocar = true) {
   resumen.hidden = false;
   if (enfocar && primero !== null) {
     primero.focus();
+  }
+}
+
+export function redibujarErrores() {
+  mostrarErrores(erroresVigentes, false);
+}
+
+// Al corregir un campo desaparece su error, sin esperar al siguiente envío.
+function quitarErroresDeCampo(nombre) {
+  const restantes = [];
+  let habiaErrores = false;
+  for (const error of erroresVigentes) {
+    if (error.field === nombre) {
+      habiaErrores = true;
+    } else {
+      restantes.push(error);
+    }
+  }
+  if (habiaErrores) {
+    mostrarErrores(restantes, false);
+  }
+}
+
+// Campo del contrato al que pertenece el elemento modificado
+function campoDeElemento(destino) {
+  if (destino.name === "options") {
+    return "options";
+  }
+  if (destino.id.startsWith("no-sabe-")) {
+    return destino.id.slice("no-sabe-".length);
+  }
+  if (destino.id.startsWith("campo-")) {
+    return destino.id.slice("campo-".length);
+  }
+  return null;
+}
+
+function alModificarCampo(evento) {
+  const nombre = campoDeElemento(evento.target);
+  if (nombre !== null) {
+    quitarErroresDeCampo(nombre);
   }
 }

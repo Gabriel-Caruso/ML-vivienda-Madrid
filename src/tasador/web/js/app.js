@@ -17,6 +17,7 @@ import {
   leerPeticion,
   limpiarErrores,
   mostrarErrores,
+  redibujarErrores,
   traducirFormulario,
 } from "./formulario.js";
 import {
@@ -34,7 +35,6 @@ const ESPERA_REDIMENSION_MS = 150;
 
 let informe = null;
 let catalogo = null;
-let ultimosErrores = null;
 
 function redibujarGraficos() {
   if (informe !== null) {
@@ -118,13 +118,10 @@ function traducirPagina() {
   escribirTextosModelo();
   redibujarGraficos();
   actualizarBarraEstado();
-  if (ultimosErrores !== null) {
-    mostrarErrores(ultimosErrores, false);
-  }
+  redibujarErrores();
 }
 
 function senalarErrores(errores) {
-  ultimosErrores = errores;
   mostrarErrores(errores);
 }
 
@@ -137,7 +134,6 @@ function bloquearBoton(bloqueado) {
 async function alEnviar(evento) {
   evento.preventDefault();
   limpiarErrores();
-  ultimosErrores = null;
   const { peticion, errores } = leerPeticion();
   if (errores.length > 0) {
     senalarErrores(errores);

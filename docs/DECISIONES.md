@@ -13,7 +13,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 | Contrato y servicio | D-004 rutas · D-015 nombres públicos · D-018 horquilla · D-019 validación y errores · D-020 fila del modelo · D-021 redondeo · D-022 metadata · D-023 arranque y logs |
 | Calidad | D-010 tests · D-017 fixtures · D-025 integración continua |
 | Despliegue y documentación | D-026 Render · D-027 README |
-| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG · D-039 paleta VGA · D-040 sobre el modelo · D-041 imagen para compartir |
+| Fase 2: interfaz web | D-028 arquitectura y URL de la API · D-029 informe del modelo y gráficos · D-030 árbol del fondo · D-031 catálogo estático · D-032 fuentes · D-033 paleta · D-034 casas y chalets · D-035 lógica de la web · D-036 caché de la web · D-037 estética y lista anti-IA · D-038 gráficos SVG · D-039 paleta VGA · D-040 sobre el modelo · D-041 imagen para compartir · D-042 usabilidad del formulario |
 
 ---
 
@@ -280,6 +280,8 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Ajustes posteriores en el panel:** Health Check Path estaba vacío y se fijó a `/api/v1/health`. El primer build avisó de que Render no tenía acceso al repositorio a través de su aplicación de GitHub; sin ese acceso no recibe pushes ni el estado de la CI y `checksPass` no dispara despliegues. Se concedió el acceso y se desplegó `0944189` manualmente.
 - **Verificado con `0944189` desplegado (URL pública):** precio, mínimo y máximo redondeados; tramo general (16 % y 15 %) y de lujo (24 %); chalet sin datos opcionales; `HEAD` 200 en `/` y `/api/v1/health`; `NOT_FOUND` (404), `METHOD_NOT_ALLOWED` (405 con `Allow: POST`), `INVALID_JSON` (400 con cuerpo Latin-1), varios errores 422 a la vez y `BARRIO_NOT_IN_ZONE`.
 - **Memoria:** límite de 512 MB en el plan gratuito. El uso real solo se muestra en planes de pago; la referencia es la medición local (unos 192 MiB, D-009).
+- **Static Site en el blueprint (fase 2, paso 4):** `render.yaml` describe también el Static Site (`runtime: static`, `staticPublishPath: src/tasador/web`, el comando de build que escribe `config.js` con `API_BASE_URL` y `PORTFOLIO_URL`, y la cabecera `Cache-Control: no-cache` en `/*`) y la variable `ALLOWED_ORIGINS` del Web Service. Sin `autoDeployTrigger` en el Static Site: la documentación de Render no aclara si lo admite, así que ese ajuste queda en el panel. Un test comprueba que el comando de build, con las variables vacías, genera exactamente el `config.js` versionado.
+- **Verificado en producción (fase 2):** el Static Site publica la web con `apiBaseUrl` apuntando a la API, CORS admite su origen y una estimación completa (chalet en Aravaca con jardín y piscina, 1.005.000 €, ±15 %) funciona de extremo a extremo.
 - **Alternativas descartadas:** `pip install` con un `requirements.txt` exportado (duplicaría `uv.lock`); `autoDeployTrigger: commit` (podría desplegar un commit con tests rotos).
 - **Fuentes:** https://render.com/docs/blueprint-spec, https://render.com/docs/uv-version, https://render.com/docs/troubleshooting-python-deploys, https://render.com/docs/web-services, https://render.com/docs/health-checks, https://render.com/docs/free
 
@@ -288,6 +290,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Estado:** aprobada.
 - **Qué:** en español. Incluye qué es, el origen del modelo, las métricas en test indicadas por el responsable (MAE 180.710 €, RMSE 439.765 €, R² 0,863), la tabla de tramos, cómo ejecutarlo en local con uv, los endpoints con ejemplos reales, la tabla de códigos de error, el despliegue y el arranque en frío de Render (15 minutos sin tráfico, alrededor de un minuto para despertar), las limitaciones y la autoría (Ramiro Caruso y Ana Manzanares, con el EDA acreditado a Ana).
 - **Fecha de los datos:** anuncios de Idealista Madrid de 2025, confirmado por el responsable del proyecto. El README lo indica en el origen del modelo y en las limitaciones.
+- **Actualización de la fase 2:** URLs de producción, sección de la interfaz web, `GET /api/v1/`, configuración completa de los dos servicios de Render (con `ALLOWED_ORIGINS`, `API_BASE_URL`, `PORTFOLIO_URL` y la cabecera de caché), tabla de scripts de datos con lo que genera cada uno, estructura con `web/`, autoría del servicio web y créditos de las fuentes.
 
 ## D-028. Arquitectura de la interfaz web y URL de la API
 
@@ -369,7 +372,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Estado:** aprobada como corrección técnica del paso 2.
 - **Problema detectado:** al regenerar `informe_modelo.json` y cambiar `app.js`, el navegador siguió usando las versiones anteriores de su caché, incluso al recargar. En producción, cada despliegue podría servir JavaScript y datos atrasados.
 - **Qué:** la app sirve todos los archivos de la web con `Cache-Control: no-cache`: el navegador puede guardarlos, pero los revalida con el servidor (ETag) en cada carga y solo los vuelve a descargar si han cambiado. Las respuestas de la API no llevan esa cabecera.
-- **Pendiente (paso 4):** la misma cabecera en el Static Site de Render (regla `/*` en `render.yaml` y en el panel).
+- **Static Site:** la misma cabecera, con la regla `/*`, está en `render.yaml` (paso 4). Como el servicio se creó desde el panel, hay que añadirla también allí (Settings > Headers).
 - **Alternativas descartadas:** `fetch(..., { cache: "no-cache" })` en el JavaScript (no cubre los propios módulos JS ni el CSS); nombres de archivo con huella (`app.3f2a.js`), que exigirían un paso de build.
 
 ## D-037. Estética de terminal y lista "que no parezca hecha por una IA"
@@ -396,6 +399,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Concesión:** al pasar el ratón por un botón, este se pone en vídeo inverso (cambio instantáneo, sin transición). No es una animación decorativa: es la forma de señalar el elemento activo en una interfaz de terminal.
 - **Verificado en Chrome (local):** a 1440 px y a 390 px (esta última en un `iframe` de 390 × 844, porque la ventana de Chrome no se puede estrechar tanto), sin desbordamiento horizontal. Ajustes hechos tras verlo: el árbol tapado por el fondo, etiquetas de eje sin decimales sobrantes, alineación de planta, ascensor y localización, leyenda y etiqueta del gráfico B, y disposición compacta de los gráficos en pantallas estrechas.
 - **No verificado en navegador:** `prefers-reduced-motion` (la extensión no puede emularlo); se cubre con tests que comprueban las reglas del CSS y la rama del JavaScript.
+- **Repaso final (paso 4), punto por punto:** cumplen los 16 puntos. Comprobados por test: 1, 2, 3, 4, 8, 9 y 11. Comprobados en el código: sin `<hr>` (14), sin modales, toasts ni banners (16), sin transiciones ni animaciones de scroll (11 y 15), sin lenguaje de marketing en los textos (12); los tamaños en px son los de la rejilla de 8/16 px de la fuente VGA y el resto del espaciado va en `ch` y en la altura de línea (10). Comprobados a ojo en Chrome: 5, 6, 7 y 13. Matiz del punto 5: la cabecera es un logo de arte ASCII centrado con una línea de subtítulo, aprobado expresamente (D-039); no es un hero de landing (no hay titular de marketing, ni botón de llamada a la acción, ni subtítulo gris grande) y va seguido directamente del registro de arranque.
 
 ## D-038. Gráficos en SVG propio
 
@@ -432,9 +436,15 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Pillow:** el script usa Pillow, que ya está instalado como dependencia de matplotlib (a su vez, de catboost). No se añade al proyecto; si algún día dejara de llegar por esa vía, habría que declararlo en el grupo de desarrollo.
 - **Comprobado por tests:** dimensiones (leídas de la cabecera del PNG), determinismo, que el archivo versionado es el que genera el script, que el logo es idéntico al del HTML y que solo usa colores de la paleta.
 
+## D-042. Usabilidad del formulario
+
+- **Estado:** aprobada (detectado al verificar en producción).
+- **Desplegables con búsqueda:** la lista de distrito y barrio se abre al escribir, al hacer clic o con la flecha abajo, pero ya no solo por recibir el foco. Antes, al enviar con errores, el foco iba al distrito, la lista se abría y tapaba el mensaje de error.
+- **Errores que se limpian:** el mensaje de error de un campo desaparece en cuanto se modifica ese campo (escribir, elegir una opción, marcar "no lo sé" o una casilla), sin esperar al siguiente envío. Los errores que siguen vigentes se conservan y se redibujan al cambiar de idioma.
+- **Verificado en Chrome (local, web y API en orígenes distintos):** tras el error, el foco va al distrito sin abrir la lista; al escribir se abre y desaparece solo el error del distrito.
+
 ---
 
 ## Pendiente de confirmar
 
-- `ALLOWED_ORIGINS` en el Web Service de Render (`https://ml-vivienda-madrid-1.onrender.com`) para que el Static Site pueda llamar a la API (D-028).
-- Cabecera `Cache-Control: no-cache` en el Static Site (D-036, paso 4).
+- Cabecera `Cache-Control: no-cache` en el panel del Static Site de Render, si no está ya (D-036).

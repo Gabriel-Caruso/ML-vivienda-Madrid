@@ -104,3 +104,21 @@ def test_sin_recursos_de_terceros_en_el_html():
 def test_metadata_marca_las_casas_y_chalets():
     for tipo in construir_metadata().property_types:
         assert tipo.is_house == (tipo.value in TIPOS_CASA_O_CHALET)
+
+
+# Usabilidad del formulario (D-042). Sin ejecutor de JavaScript en el proyecto,
+# se comprueba el código fuente; el comportamiento se verificó en Chrome.
+
+
+def test_desplegable_no_se_abre_solo_por_recibir_el_foco():
+    codigo = (RUTA_WEB / "js" / "combobox.js").read_text(encoding="utf-8")
+    assert 'addEventListener("focus"' not in codigo
+    assert 'addEventListener("click"' in codigo
+    assert 'addEventListener("input"' in codigo
+
+
+def test_errores_de_un_campo_se_quitan_al_modificarlo():
+    codigo = (RUTA_WEB / "js" / "formulario.js").read_text(encoding="utf-8")
+    assert 'addEventListener("input", alModificarCampo)' in codigo
+    assert 'addEventListener("change", alModificarCampo)' in codigo
+    assert "function quitarErroresDeCampo(nombre)" in codigo
