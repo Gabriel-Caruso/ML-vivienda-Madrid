@@ -372,7 +372,7 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 - **Estado:** aprobada como corrección técnica del paso 2.
 - **Problema detectado:** al regenerar `informe_modelo.json` y cambiar `app.js`, el navegador siguió usando las versiones anteriores de su caché, incluso al recargar. En producción, cada despliegue podría servir JavaScript y datos atrasados.
 - **Qué:** la app sirve todos los archivos de la web con `Cache-Control: no-cache`: el navegador puede guardarlos, pero los revalida con el servidor (ETag) en cada carga y solo los vuelve a descargar si han cambiado. Las respuestas de la API no llevan esa cabecera.
-- **Static Site:** la misma cabecera, con la regla `/*`, está en `render.yaml` (paso 4). Como el servicio se creó desde el panel, hay que añadirla también allí (Settings > Headers).
+- **Static Site:** la misma cabecera, con la regla `/*`, está en `render.yaml` (paso 4). Como el servicio se creó desde el panel, se añadió también allí (Headers, ruta `/*`); verificado en producción: `/`, `config.js`, los módulos JS y los datos responden con `Cache-Control: no-cache`.
 - **Alternativas descartadas:** `fetch(..., { cache: "no-cache" })` en el JavaScript (no cubre los propios módulos JS ni el CSS); nombres de archivo con huella (`app.3f2a.js`), que exigirían un paso de build.
 
 ## D-037. Estética de terminal y lista "que no parezca hecha por una IA"
@@ -447,4 +447,4 @@ Estado: **aprobada** (confirmada por el responsable del proyecto), **informativo
 
 ## Pendiente de confirmar
 
-- Cabecera `Cache-Control: no-cache` en el panel del Static Site de Render, si no está ya (D-036).
+- Nada pendiente al cierre de la fase 2.
